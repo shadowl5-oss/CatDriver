@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import SimpleAsciiArt from '@/components/SimpleAsciiArt';
 import { 
   Dialog, 
   DialogContent, 
@@ -183,12 +184,18 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
             {loading ? (
               <Skeleton className="h-[300px] w-full rounded-md" />
             ) : (
-              <div className="relative">
-                <img 
-                  src={nft.image} 
-                  alt={nft.name} 
-                  className="w-full h-auto rounded-md object-cover"
-                />
+              <div className="relative rounded-md overflow-hidden bg-black">
+                <div className="flex items-center justify-center p-4">
+                  <SimpleAsciiArt 
+                    type={ordinalData ? 
+                          (nft.id % 4 === 0 ? "quantum" : 
+                           nft.id % 4 === 1 ? "bitcoin" : 
+                           nft.id % 4 === 2 ? "cypherpunk" : "schrodinger") : "generic"}
+                    width={300}
+                    height={300}
+                    showBorder={true}
+                  />
+                </div>
                 {ordinalData?.quantumState === 'unobserved' && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <div className="text-center">
