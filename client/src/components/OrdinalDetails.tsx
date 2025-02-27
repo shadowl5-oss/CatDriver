@@ -116,7 +116,7 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
       
       // Call the blockchain service to transfer the ordinal
       const transaction = await transferOrdinal(
-        ordinalData.tokenId,
+        parseInt(ordinalData.tokenId),
         recipientAddress,
         parseFloat(transferAmount) || 0
       );
