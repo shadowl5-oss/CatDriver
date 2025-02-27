@@ -1,6 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage, PgStorage } from "./storage";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import "dotenv/config";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +40,34 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  try {
+    // Get the database instance
+    if (storage instanceof PgStorage) {
+      log("Initializing PostgreSQL database...");
+      
+      // Check for migrations directory
+      const fs = require('fs');
+      const path = require('path');
+      
+      const migrationsDir = path.join(__dirname, '..', 'migrations');
+      if (!fs.existsSync(migrationsDir) || fs.readdirSync(migrationsDir).length === 0) {
+        log("No migrations found. Please run 'npx drizzle-kit generate' to create migrations.");
+      } else {
+        log("Running database migrations...");
+        // Run migrations
+        const db = (storage as PgStorage).getDb();
+        await migrate(db, { migrationsFolder: 'migrations' });
+        log("Database migrations completed successfully.");
+      }
+      
+      // Initialize mock data
+      await (storage as PgStorage).initializeMockData();
+    }
+  } catch (error) {
+    log(`Database initialization error: ${error}`);
+    process.exit(1);
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

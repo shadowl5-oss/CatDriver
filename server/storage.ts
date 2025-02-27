@@ -377,6 +377,11 @@ export class PgStorage implements IStorage {
     this.db = drizzle(this.client);
   }
   
+  // Expose the DB instance for migrations
+  getDb(): ReturnType<typeof drizzle> {
+    return this.db;
+  }
+  
   // User methods
   async getUser(id: number): Promise<User | undefined> {
     const results = await this.db.select().from(users).where(eq(users.id, id));
@@ -389,7 +394,11 @@ export class PgStorage implements IStorage {
   }
   
   async createUser(user: InsertUser): Promise<User> {
-    const results = await this.db.insert(users).values(user).returning();
+    // Fix nullability issues
+    const nullableFields = ['displayName', 'profileImage', 'isConnected'];
+    const fixedUser = fixNullability(user, nullableFields);
+    
+    const results = await this.db.insert(users).values(fixedUser).returning();
     return results[0];
   }
   
@@ -399,7 +408,11 @@ export class PgStorage implements IStorage {
   }
   
   async createAsset(asset: InsertAsset): Promise<Asset> {
-    const results = await this.db.insert(assets).values(asset).returning();
+    // Fix nullability issues
+    const nullableFields = ['priceChange', 'icon', 'iconColor'];
+    const fixedAsset = fixNullability(asset, nullableFields);
+    
+    const results = await this.db.insert(assets).values(fixedAsset).returning();
     return results[0];
   }
   
@@ -413,7 +426,11 @@ export class PgStorage implements IStorage {
   }
   
   async createCatNft(nft: InsertCatNft): Promise<CatNft> {
-    const results = await this.db.insert(catNfts).values(nft).returning();
+    // Fix nullability issues
+    const nullableFields = ['ownerId'];
+    const fixedNft = fixNullability(nft, nullableFields);
+    
+    const results = await this.db.insert(catNfts).values(fixedNft).returning();
     return results[0];
   }
   
@@ -427,7 +444,11 @@ export class PgStorage implements IStorage {
   }
   
   async createProposal(proposal: InsertProposal): Promise<Proposal> {
-    const results = await this.db.insert(proposals).values(proposal).returning();
+    // Fix nullability issues
+    const nullableFields = ['votesFor', 'votesAgainst'];
+    const fixedProposal = fixNullability(proposal, nullableFields);
+    
+    const results = await this.db.insert(proposals).values(fixedProposal).returning();
     return results[0];
   }
   
@@ -658,6 +679,20 @@ export class PgStorage implements IStorage {
   async close(): Promise<void> {
     await this.client.end();
   }
+}
+
+// Fix any schema inconsistencies in the mock data
+function fixNullability(obj: any, nullableFields: string[]): any {
+  const result = { ...obj };
+  
+  // Ensure all nullable fields have at least null as a value instead of undefined
+  for (const field of nullableFields) {
+    if (result[field] === undefined) {
+      result[field] = null;
+    }
+  }
+  
+  return result;
 }
 
 // Create and export the storage instance
