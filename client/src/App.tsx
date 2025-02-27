@@ -11,6 +11,7 @@ import Staking from "@/pages/Staking";
 import Presentation from "@/pages/Presentation";
 import LostPets from "@/pages/LostPets";
 import Explorer from "@/pages/Explorer";
+import Ordinals from "@/pages/Ordinals";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/presentation" component={Presentation} />
       <Route path="/lost-pets" component={LostPets} />
       <Route path="/explorer" component={Explorer} />
+      <Route path="/ordinals" component={Ordinals} />
       <Route component={NotFound} />
     </Switch>
   );
