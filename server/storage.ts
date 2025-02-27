@@ -703,9 +703,6 @@ function fixNullability(obj: any, nullableFields: string[]): any {
   return result;
 }
 
-// Re-export the PgStorage class
-export { PgStorage };
-
 // Create and export the storage instance
 // Use PostgreSQL storage if DATABASE_URL is available, otherwise fall back to in-memory
 export const storage = new PgStorage();
