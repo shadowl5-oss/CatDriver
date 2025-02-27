@@ -336,6 +336,172 @@ export default function Portfolio() {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="ordinals">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <span>Bitcoin Ordinals Collection</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <i className="fas fa-refresh mr-2"></i> Refresh
+                  </Button>
+                  <Button size="sm">
+                    <i className="fas fa-plus mr-2"></i> Inscribe New
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 p-4 bg-secondary/10 rounded-md border border-secondary/20">
+                <h3 className="text-lg font-medium mb-2 flex items-center">
+                  <i className="fas fa-info-circle mr-2 text-secondary"></i>
+                  About Bitcoin Ordinals
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Ordinals are digital artifacts native to the Bitcoin blockchain. Unlike traditional NFTs, 
+                  Ordinals are inscribed directly onto individual satoshis (the smallest unit of Bitcoin), 
+                  making them truly on-chain and permanent. Your Cat Ordinals use Schrödinger's quantum mechanics 
+                  principles, existing in multiple states until observed.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Inscribed Cats */}
+                <div className="p-4 bg-muted rounded-lg">
+                  <div className="aspect-square rounded-md overflow-hidden mb-3">
+                    <img 
+                      src="https://i.pravatar.cc/300?img=1" 
+                      alt="Legendary Sphinx Cat" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h4 className="font-medium">Legendary Sphinx Cat #042</h4>
+                  <div className="flex justify-between items-center mt-1 mb-3">
+                    <span className="text-xs text-muted-foreground">Inscription #784901</span>
+                    <span className="text-xs font-mono">7.5 BTC</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="inline-flex items-center bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded-full">
+                      <i className="fas fa-star mr-1"></i> Legendary
+                    </span>
+                    <span className="text-secondary">Block #790213</span>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-muted rounded-lg">
+                  <div className="aspect-square rounded-md overflow-hidden mb-3">
+                    <img 
+                      src="https://i.pravatar.cc/300?img=2" 
+                      alt="Epic Maine Coon" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h4 className="font-medium">Epic Maine Coon #108</h4>
+                  <div className="flex justify-between items-center mt-1 mb-3">
+                    <span className="text-xs text-muted-foreground">Inscription #782115</span>
+                    <span className="text-xs font-mono">3.2 BTC</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="inline-flex items-center bg-purple-500/20 text-purple-500 px-2 py-1 rounded-full">
+                      <i className="fas fa-trophy mr-1"></i> Epic
+                    </span>
+                    <span className="text-secondary">Block #788156</span>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-muted rounded-lg">
+                  <div className="aspect-square rounded-md overflow-hidden mb-3">
+                    <img 
+                      src="https://i.pravatar.cc/300?img=3" 
+                      alt="Rare Siamese" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h4 className="font-medium">Rare Siamese #291</h4>
+                  <div className="flex justify-between items-center mt-1 mb-3">
+                    <span className="text-xs text-muted-foreground">Inscription #779323</span>
+                    <span className="text-xs font-mono">1.8 BTC</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="inline-flex items-center bg-blue-500/20 text-blue-500 px-2 py-1 rounded-full">
+                      <i className="fas fa-gem mr-1"></i> Rare
+                    </span>
+                    <span className="text-secondary">Block #784992</span>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-muted rounded-lg">
+                  <div className="aspect-square rounded-md overflow-hidden mb-3">
+                    <img 
+                      src="https://i.pravatar.cc/300?img=4" 
+                      alt="Common Tabby" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h4 className="font-medium">Common Tabby #573</h4>
+                  <div className="flex justify-between items-center mt-1 mb-3">
+                    <span className="text-xs text-muted-foreground">Inscription #775668</span>
+                    <span className="text-xs font-mono">0.5 BTC</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="inline-flex items-center bg-green-500/20 text-green-500 px-2 py-1 rounded-full">
+                      <i className="fas fa-tag mr-1"></i> Common
+                    </span>
+                    <span className="text-secondary">Block #781435</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-3">Bitcoin Blockchain Data</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left px-4 py-2 text-muted-foreground">Inscription</th>
+                        <th className="text-left px-4 py-2 text-muted-foreground">Block</th>
+                        <th className="text-left px-4 py-2 text-muted-foreground">Satoshi</th>
+                        <th className="text-left px-4 py-2 text-muted-foreground">Timestamp</th>
+                        <th className="text-left px-4 py-2 text-muted-foreground">State</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-border hover:bg-muted">
+                        <td className="px-4 py-2 font-mono text-xs">#784901</td>
+                        <td className="px-4 py-2">790213</td>
+                        <td className="px-4 py-2 font-mono text-xs">2100000000</td>
+                        <td className="px-4 py-2">2025-01-15 14:32 UTC</td>
+                        <td className="px-4 py-2"><span className="text-green-500">Observed</span></td>
+                      </tr>
+                      <tr className="border-b border-border hover:bg-muted">
+                        <td className="px-4 py-2 font-mono text-xs">#782115</td>
+                        <td className="px-4 py-2">788156</td>
+                        <td className="px-4 py-2 font-mono text-xs">2099989200</td>
+                        <td className="px-4 py-2">2025-01-12 09:17 UTC</td>
+                        <td className="px-4 py-2"><span className="text-green-500">Observed</span></td>
+                      </tr>
+                      <tr className="border-b border-border hover:bg-muted">
+                        <td className="px-4 py-2 font-mono text-xs">#779323</td>
+                        <td className="px-4 py-2">784992</td>
+                        <td className="px-4 py-2 font-mono text-xs">2099970900</td>
+                        <td className="px-4 py-2">2025-01-08 21:45 UTC</td>
+                        <td className="px-4 py-2"><span className="text-amber-500">Unobserved</span></td>
+                      </tr>
+                      <tr className="border-b border-border hover:bg-muted">
+                        <td className="px-4 py-2 font-mono text-xs">#775668</td>
+                        <td className="px-4 py-2">781435</td>
+                        <td className="px-4 py-2 font-mono text-xs">2099957300</td>
+                        <td className="px-4 py-2">2025-01-03 11:02 UTC</td>
+                        <td className="px-4 py-2"><span className="text-green-500">Observed</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

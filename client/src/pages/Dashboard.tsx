@@ -5,6 +5,8 @@ import TokenChart from "@/components/dashboard/TokenChart";
 import AssetsList from "@/components/dashboard/AssetsList";
 import CatCollection from "@/components/dashboard/CatCollection";
 import GovernanceProposals from "@/components/dashboard/GovernanceProposals";
+import QuantumWallet from "@/components/dashboard/QuantumWallet";
+import { enrichCatNftWithOrdinalData } from "@/services/blockchain";
 
 export default function Dashboard() {
   const { data: currentUser } = useQuery({
@@ -85,6 +87,11 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <TokenChart />
         <AssetsList />
+      </div>
+      
+      {/* Middle Row - Quantum Blockchain Features */}
+      <div className="mb-8">
+        <QuantumWallet />
       </div>
       
       {/* Bottom Row */}
