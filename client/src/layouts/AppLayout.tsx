@@ -28,7 +28,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="text-primary p-1 rounded-lg">
               <CatLogo width={36} height={36} />
             </div>
-            <h1 className="font-bold text-xl font-[Orbitron]">CATZ<span className="text-primary">3</span></h1>
+            <h1 className="font-bold text-xl font-[Orbitron]">Cat<span className="text-primary">Driven</span></h1>
           </div>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
