@@ -122,13 +122,23 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
 
   return (
     <div className="container mx-auto py-6">
-      <Button 
-        variant="ghost" 
-        onClick={onBack} 
-        className="mb-4 flex items-center"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to lost pets
-      </Button>
+      <div className="flex justify-between items-center mb-4">
+        <Button 
+          variant="ghost" 
+          onClick={onBack} 
+          className="flex items-center"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to lost pets
+        </Button>
+        <a 
+          href="https://catdao.org" 
+          className="text-sm text-muted-foreground hover:text-primary transition-colors" 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          A community service by <span className="font-medium text-primary">catdao.org</span>
+        </a>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1">
@@ -357,13 +367,21 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-2 pt-2">
-                    <Button variant="outline" type="button" onClick={() => form.reset()}>
-                      Reset
-                    </Button>
-                    <Button type="submit" disabled={createSightingMutation.isPending}>
-                      {createSightingMutation.isPending ? "Submitting..." : "Submit Sighting"}
-                    </Button>
+                  <div className="pt-2">
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" type="button" onClick={() => form.reset()}>
+                        Reset
+                      </Button>
+                      <Button type="submit" disabled={createSightingMutation.isPending}>
+                        {createSightingMutation.isPending ? "Submitting..." : "Submit Sighting"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      By submitting this form, you agree to CatDAO's community guidelines.
+                      <a href="https://catdao.org" className="text-primary hover:underline ml-1" target="_blank" rel="noopener noreferrer">
+                        Learn more at catdao.org
+                      </a>
+                    </p>
                   </div>
                 </form>
               </Form>
