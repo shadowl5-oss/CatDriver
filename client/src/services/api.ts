@@ -77,6 +77,48 @@ export const generateCatImage = async (type: string) => {
   return res.json();
 };
 
+// Lost Pet services
+export const fetchAllLostPets = async () => {
+  const res = await apiRequest("GET", "/api/lost-pets", undefined);
+  return res.json();
+};
+
+export const fetchLostPet = async (id: number) => {
+  const res = await apiRequest("GET", `/api/lost-pets/${id}`, undefined);
+  return res.json();
+};
+
+export const fetchUserLostPets = async (userId: number) => {
+  const res = await apiRequest("GET", `/api/lost-pets/user/${userId}`, undefined);
+  return res.json();
+};
+
+export const createLostPet = async (lostPetData: any) => {
+  const res = await apiRequest("POST", "/api/lost-pets", lostPetData);
+  return res.json();
+};
+
+export const updateLostPetStatus = async (id: number, isFound: boolean) => {
+  const res = await apiRequest("PATCH", `/api/lost-pets/${id}/status`, { isFound });
+  return res.json();
+};
+
+// Lost Pet Sighting services
+export const fetchLostPetSightings = async (lostPetId: number) => {
+  const res = await apiRequest("GET", `/api/lost-pet-sightings/${lostPetId}`, undefined);
+  return res.json();
+};
+
+export const createLostPetSighting = async (sightingData: any) => {
+  const res = await apiRequest("POST", "/api/lost-pet-sightings", sightingData);
+  return res.json();
+};
+
+export const verifyLostPetSighting = async (id: number, isVerified: boolean) => {
+  const res = await apiRequest("PATCH", `/api/lost-pet-sightings/${id}/verify`, { isVerified });
+  return res.json();
+};
+
 export type UserProfile = {
   id: number;
   username: string;
@@ -132,4 +174,37 @@ export type TokenPrice = {
   price: number;
   timestamp: string;
   volume: number;
+};
+
+export type LostPet = {
+  id: number;
+  name: string;
+  species: string;
+  breed: string;
+  color: string;
+  age: number;
+  gender: string;
+  lastSeenDate: string;
+  lastSeenLocation: string;
+  contactPhone: string;
+  contactEmail: string;
+  description: string;
+  photo: string;
+  isFound: boolean;
+  microchipId: string | null;
+  reward: number | null;
+  userId: number;
+};
+
+export type LostPetSighting = {
+  id: number;
+  lostPetId: number;
+  sightingDate: string;
+  sightingLocation: string;
+  description: string;
+  photo: string | null;
+  contactPhone: string;
+  contactEmail: string;
+  isVerified: boolean;
+  reportedBy: string;
 };

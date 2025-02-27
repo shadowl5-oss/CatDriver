@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertAssetSchema, insertCatNftSchema, insertProposalSchema } from "@shared/schema";
+import { insertUserSchema, insertAssetSchema, insertCatNftSchema, insertProposalSchema, insertLostPetSchema, insertLostPetSightingSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -173,6 +173,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Lost Pet routes
+  app.get("/api/lost-pets", async (req, res) => {
+    try {
+      const lostPets = await storage.getAllLostPets();
+      res.json(lostPets);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get lost pets" });
+    }
+  });
+  
+  app.get("/api/lost-pets/:id", async (req, res) => {
+    try {
+      const petId = parseInt(req.params.id);
+      const lostPet = await storage.getLostPet(petId);
+      
+      if (!lostPet) {
+        return res.status(404).json({ message: "Lost pet not found" });
+      }
+      
+      res.json(lostPet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get lost pet details" });
+    }
+  });
+  
+  app.get("/api/lost-pets/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const lostPets = await storage.getLostPetsByUserId(userId);
+      res.json(lostPets);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user's lost pets" });
+    }
+  });
+  
+  app.post("/api/lost-pets", async (req, res) => {
+    try {
+      const lostPetData = insertLostPetSchema.parse(req.body);
+      const lostPet = await storage.createLostPet(lostPetData);
+      res.status(201).json(lostPet);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid lost pet data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create lost pet report" });
+    }
+  });
+  
+  app.patch("/api/lost-pets/:id/status", async (req, res) => {
+    try {
+      const petId = parseInt(req.params.id);
+      const { isFound } = req.body;
+      
+      if (typeof isFound !== "boolean") {
+        return res.status(400).json({ message: "Invalid status data. 'isFound' must be a boolean." });
+      }
+      
+      const updatedPet = await storage.updateLostPetStatus(petId, isFound);
+      res.json(updatedPet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update lost pet status" });
+    }
+  });
+  
+  // Lost Pet Sighting routes
+  app.get("/api/lost-pet-sightings/:lostPetId", async (req, res) => {
+    try {
+      const lostPetId = parseInt(req.params.lostPetId);
+      const sightings = await storage.getLostPetSightingsByLostPetId(lostPetId);
+      res.json(sightings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get pet sightings" });
+    }
+  });
+  
+  app.post("/api/lost-pet-sightings", async (req, res) => {
+    try {
+      const sightingData = insertLostPetSightingSchema.parse(req.body);
+      const sighting = await storage.createLostPetSighting(sightingData);
+      res.status(201).json(sighting);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid sighting data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create pet sighting" });
+    }
+  });
+  
+  app.patch("/api/lost-pet-sightings/:id/verify", async (req, res) => {
+    try {
+      const sightingId = parseInt(req.params.id);
+      const { isVerified } = req.body;
+      
+      if (typeof isVerified !== "boolean") {
+        return res.status(400).json({ message: "Invalid verification data. 'isVerified' must be a boolean." });
+      }
+      
+      const updatedSighting = await storage.verifyLostPetSighting(sightingId, isVerified);
+      res.json(updatedSighting);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to verify sighting" });
+    }
+  });
+
   // Current user (for testing purposes)
   app.get("/api/current-user", async (req, res) => {
     try {

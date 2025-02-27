@@ -4,7 +4,9 @@ import {
   catNfts, CatNft, InsertCatNft,
   proposals, Proposal, InsertProposal,
   portfolios, Portfolio, InsertPortfolio,
-  tokenPrices, TokenPrice, InsertTokenPrice
+  tokenPrices, TokenPrice, InsertTokenPrice,
+  lostPets, LostPet, InsertLostPet,
+  lostPetSightings, LostPetSighting, InsertLostPetSighting
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
@@ -37,6 +39,19 @@ export interface IStorage {
   // Token price methods
   getTokenPrices(symbol: string, limit: number): Promise<TokenPrice[]>;
   addTokenPrice(tokenPrice: InsertTokenPrice): Promise<TokenPrice>;
+  
+  // Lost Pet methods
+  getLostPet(id: number): Promise<LostPet | undefined>;
+  getAllLostPets(): Promise<LostPet[]>;
+  getLostPetsByUserId(userId: number): Promise<LostPet[]>;
+  createLostPet(lostPet: InsertLostPet): Promise<LostPet>;
+  updateLostPetStatus(id: number, isFound: boolean): Promise<LostPet>;
+  
+  // Lost Pet Sightings methods
+  getLostPetSighting(id: number): Promise<LostPetSighting | undefined>;
+  getLostPetSightingsByLostPetId(lostPetId: number): Promise<LostPetSighting[]>;
+  createLostPetSighting(sighting: InsertLostPetSighting): Promise<LostPetSighting>;
+  verifyLostPetSighting(id: number, isVerified: boolean): Promise<LostPetSighting>;
 }
 
 export class MemStorage implements IStorage {
@@ -46,6 +61,8 @@ export class MemStorage implements IStorage {
   private proposals: Map<number, Proposal>;
   private portfolios: Map<number, Portfolio>;
   private tokenPrices: Map<number, TokenPrice>;
+  private lostPets: Map<number, LostPet>;
+  private lostPetSightings: Map<number, LostPetSighting>;
   
   private currentUserId: number;
   private currentAssetId: number;
@@ -53,6 +70,8 @@ export class MemStorage implements IStorage {
   private currentProposalId: number;
   private currentPortfolioId: number;
   private currentTokenPriceId: number;
+  private currentLostPetId: number;
+  private currentLostPetSightingId: number;
   
   constructor() {
     this.users = new Map();
@@ -61,6 +80,8 @@ export class MemStorage implements IStorage {
     this.proposals = new Map();
     this.portfolios = new Map();
     this.tokenPrices = new Map();
+    this.lostPets = new Map();
+    this.lostPetSightings = new Map();
     
     this.currentUserId = 1;
     this.currentAssetId = 1;
@@ -68,6 +89,8 @@ export class MemStorage implements IStorage {
     this.currentProposalId = 1;
     this.currentPortfolioId = 1;
     this.currentTokenPriceId = 1;
+    this.currentLostPetId = 1;
+    this.currentLostPetSightingId = 1;
     
     // Initialize with mock data
     this.initMockData();
@@ -214,6 +237,95 @@ export class MemStorage implements IStorage {
     };
     this.tokenPrices.set(id, tokenPrice);
     return tokenPrice;
+  }
+  
+  // Lost Pet methods
+  async getLostPet(id: number): Promise<LostPet | undefined> {
+    return this.lostPets.get(id);
+  }
+  
+  async getAllLostPets(): Promise<LostPet[]> {
+    return Array.from(this.lostPets.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  
+  async getLostPetsByUserId(userId: number): Promise<LostPet[]> {
+    return Array.from(this.lostPets.values())
+      .filter(lostPet => lostPet.userId === userId);
+  }
+  
+  async createLostPet(insertLostPet: InsertLostPet): Promise<LostPet> {
+    const id = this.currentLostPetId++;
+    const now = new Date();
+    const lostPet: LostPet = {
+      ...insertLostPet,
+      id,
+      imageUrl: insertLostPet.imageUrl || null,
+      rewardAmount: insertLostPet.rewardAmount || null,
+      isFound: insertLostPet.isFound ?? false,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.lostPets.set(id, lostPet);
+    return lostPet;
+  }
+  
+  async updateLostPetStatus(id: number, isFound: boolean): Promise<LostPet> {
+    const lostPet = this.lostPets.get(id);
+    
+    if (!lostPet) {
+      throw new Error(`Lost pet with ID ${id} not found`);
+    }
+    
+    const updatedLostPet = {
+      ...lostPet,
+      isFound,
+      updatedAt: new Date()
+    };
+    
+    this.lostPets.set(id, updatedLostPet);
+    return updatedLostPet;
+  }
+  
+  // Lost Pet Sightings methods
+  async getLostPetSighting(id: number): Promise<LostPetSighting | undefined> {
+    return this.lostPetSightings.get(id);
+  }
+  
+  async getLostPetSightingsByLostPetId(lostPetId: number): Promise<LostPetSighting[]> {
+    return Array.from(this.lostPetSightings.values())
+      .filter(sighting => sighting.lostPetId === lostPetId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  
+  async createLostPetSighting(insertSighting: InsertLostPetSighting): Promise<LostPetSighting> {
+    const id = this.currentLostPetSightingId++;
+    const now = new Date();
+    const sighting: LostPetSighting = {
+      ...insertSighting,
+      id,
+      imageUrl: insertSighting.imageUrl || null,
+      isVerified: insertSighting.isVerified ?? false,
+      createdAt: now
+    };
+    this.lostPetSightings.set(id, sighting);
+    return sighting;
+  }
+  
+  async verifyLostPetSighting(id: number, isVerified: boolean): Promise<LostPetSighting> {
+    const sighting = this.lostPetSightings.get(id);
+    
+    if (!sighting) {
+      throw new Error(`Sighting with ID ${id} not found`);
+    }
+    
+    const updatedSighting = {
+      ...sighting,
+      isVerified
+    };
+    
+    this.lostPetSightings.set(id, updatedSighting);
+    return updatedSighting;
   }
   
   // Initialize mock data
@@ -382,6 +494,68 @@ export class MemStorage implements IStorage {
     tokenPrices.forEach((tp) => {
       this.addTokenPrice(tp);
     });
+    
+    // Create some lost pet reports
+    const lostPets: InsertLostPet[] = [
+      {
+        userId: user.id,
+        catName: "Whiskers",
+        description: "Adult male orange tabby with white paws and chest. Friendly and responds to his name.",
+        lastSeenLocation: "Central Park, near the East 72nd entrance",
+        lastSeenDate: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        contactInfo: "Call or text 555-123-4567",
+        imageUrl: "https://i.pravatar.cc/300?img=5",
+        rewardAmount: 100,
+        isFound: false
+      },
+      {
+        userId: user.id,
+        catName: "Luna",
+        description: "Young female black cat with yellow eyes. Very shy and might hide if approached.",
+        lastSeenLocation: "Brooklyn Heights, near the promenade",
+        lastSeenDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        contactInfo: "Email: findluna@example.com",
+        imageUrl: "https://i.pravatar.cc/300?img=6",
+        rewardAmount: 200,
+        isFound: false
+      }
+    ];
+    
+    // Add lost pets
+    const createdLostPets = lostPets.map(pet => this.createLostPet(pet));
+    
+    // Add some sightings for the first lost pet
+    Promise.all(createdLostPets).then(pets => {
+      if (pets.length > 0) {
+        const firstPet = pets[0];
+        
+        const sightings: InsertLostPetSighting[] = [
+          {
+            lostPetId: firstPet.id,
+            reportedByUserId: user.id,
+            location: "Central Park, near Bethesda Fountain",
+            sightingDate: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+            description: "Saw an orange cat that matches the description. It ran off when I approached.",
+            contactInfo: "Call me at 555-987-6543",
+            isVerified: false
+          },
+          {
+            lostPetId: firstPet.id,
+            reportedByUserId: user.id,
+            location: "East 70th Street and 5th Avenue",
+            sightingDate: new Date(today.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
+            description: "Orange tabby with white paws spotted in the morning, was eating from a food bowl left on a porch.",
+            imageUrl: "https://i.pravatar.cc/300?img=7",
+            contactInfo: "Email: catlover@example.com",
+            isVerified: true
+          }
+        ];
+        
+        sightings.forEach(sighting => {
+          this.createLostPetSighting(sighting);
+        });
+      }
+    });
   }
 }
 
@@ -487,6 +661,70 @@ export class DatabaseStorage implements IStorage {
   async addTokenPrice(tokenPrice: InsertTokenPrice): Promise<TokenPrice> {
     const results = await db.insert(tokenPrices).values(tokenPrice).returning();
     return results[0];
+  }
+  
+  // Lost Pet methods
+  async getLostPet(id: number): Promise<LostPet | undefined> {
+    const results = await db.select().from(lostPets).where(eq(lostPets.id, id));
+    return results[0];
+  }
+  
+  async getAllLostPets(): Promise<LostPet[]> {
+    return await db.select().from(lostPets).orderBy(desc(lostPets.createdAt));
+  }
+  
+  async getLostPetsByUserId(userId: number): Promise<LostPet[]> {
+    return await db.select().from(lostPets).where(eq(lostPets.userId, userId));
+  }
+  
+  async createLostPet(lostPet: InsertLostPet): Promise<LostPet> {
+    const results = await db.insert(lostPets).values(lostPet).returning();
+    return results[0];
+  }
+  
+  async updateLostPetStatus(id: number, isFound: boolean): Promise<LostPet> {
+    await db.update(lostPets)
+      .set({ isFound, updatedAt: new Date() })
+      .where(eq(lostPets.id, id));
+      
+    const [updatedLostPet] = await db.select().from(lostPets).where(eq(lostPets.id, id));
+    
+    if (!updatedLostPet) {
+      throw new Error(`Failed to retrieve updated lost pet with ID ${id}`);
+    }
+    
+    return updatedLostPet;
+  }
+  
+  // Lost Pet Sightings methods
+  async getLostPetSighting(id: number): Promise<LostPetSighting | undefined> {
+    const results = await db.select().from(lostPetSightings).where(eq(lostPetSightings.id, id));
+    return results[0];
+  }
+  
+  async getLostPetSightingsByLostPetId(lostPetId: number): Promise<LostPetSighting[]> {
+    return await db.select().from(lostPetSightings)
+      .where(eq(lostPetSightings.lostPetId, lostPetId))
+      .orderBy(desc(lostPetSightings.createdAt));
+  }
+  
+  async createLostPetSighting(sighting: InsertLostPetSighting): Promise<LostPetSighting> {
+    const results = await db.insert(lostPetSightings).values(sighting).returning();
+    return results[0];
+  }
+  
+  async verifyLostPetSighting(id: number, isVerified: boolean): Promise<LostPetSighting> {
+    await db.update(lostPetSightings)
+      .set({ isVerified })
+      .where(eq(lostPetSightings.id, id));
+      
+    const [updatedSighting] = await db.select().from(lostPetSightings).where(eq(lostPetSightings.id, id));
+    
+    if (!updatedSighting) {
+      throw new Error(`Failed to retrieve updated sighting with ID ${id}`);
+    }
+    
+    return updatedSighting;
   }
   
   // Method to initialize the database with mock data
@@ -648,6 +886,66 @@ export class DatabaseStorage implements IStorage {
           timestamp: new Date(today.getTime() - i * 24 * 60 * 60 * 1000),
           volume: Math.random() * 1000000 + 500000
         });
+      }
+      
+      // Create lost pet reports
+      const lostPets: InsertLostPet[] = [
+        {
+          userId: user.id,
+          catName: "Whiskers",
+          description: "Adult male orange tabby with white paws and chest. Friendly and responds to his name.",
+          lastSeenLocation: "Central Park, near the East 72nd entrance",
+          lastSeenDate: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+          contactInfo: "Call or text 555-123-4567",
+          imageUrl: "https://i.pravatar.cc/300?img=5",
+          rewardAmount: 100,
+          isFound: false
+        },
+        {
+          userId: user.id,
+          catName: "Luna",
+          description: "Young female black cat with yellow eyes. Very shy and might hide if approached.",
+          lastSeenLocation: "Brooklyn Heights, near the promenade",
+          lastSeenDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+          contactInfo: "Email: findluna@example.com",
+          imageUrl: "https://i.pravatar.cc/300?img=6",
+          rewardAmount: 200,
+          isFound: false
+        }
+      ];
+      
+      // Add lost pets and sightings
+      for (const pet of lostPets) {
+        const createdPet = await this.createLostPet(pet);
+        
+        // Add sightings for the first pet (Whiskers)
+        if (pet.catName === "Whiskers") {
+          const sightings: InsertLostPetSighting[] = [
+            {
+              lostPetId: createdPet.id,
+              reportedByUserId: user.id,
+              location: "Central Park, near Bethesda Fountain",
+              sightingDate: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+              description: "Saw an orange cat that matches the description. It ran off when I approached.",
+              contactInfo: "Call me at 555-987-6543",
+              isVerified: false
+            },
+            {
+              lostPetId: createdPet.id,
+              reportedByUserId: user.id,
+              location: "East 70th Street and 5th Avenue",
+              sightingDate: new Date(today.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
+              description: "Orange tabby with white paws spotted in the morning, was eating from a food bowl left on a porch.",
+              imageUrl: "https://i.pravatar.cc/300?img=7",
+              contactInfo: "Email: catlover@example.com",
+              isVerified: true
+            }
+          ];
+          
+          for (const sighting of sightings) {
+            await this.createLostPetSighting(sighting);
+          }
+        }
       }
     }
   }

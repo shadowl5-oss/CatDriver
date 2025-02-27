@@ -135,3 +135,62 @@ export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
 
 export type TokenPrice = typeof tokenPrices.$inferSelect;
 export type InsertTokenPrice = z.infer<typeof insertTokenPriceSchema>;
+
+// Lost Pet table
+export const lostPets = pgTable("lost_pets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  catName: text("cat_name").notNull(),
+  description: text("description").notNull(),
+  lastSeenLocation: text("last_seen_location").notNull(),
+  lastSeenDate: timestamp("last_seen_date").notNull(),
+  contactInfo: text("contact_info").notNull(),
+  imageUrl: text("image_url"),
+  rewardAmount: doublePrecision("reward_amount"),
+  isFound: boolean("is_found").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertLostPetSchema = createInsertSchema(lostPets).pick({
+  userId: true,
+  catName: true,
+  description: true,
+  lastSeenLocation: true,
+  lastSeenDate: true,
+  contactInfo: true,
+  imageUrl: true,
+  rewardAmount: true,
+  isFound: true
+});
+
+// Lost Pet Sighting table
+export const lostPetSightings = pgTable("lost_pet_sightings", {
+  id: serial("id").primaryKey(),
+  lostPetId: integer("lost_pet_id").notNull(),
+  reportedByUserId: integer("reported_by_user_id").notNull(),
+  location: text("location").notNull(),
+  sightingDate: timestamp("sighting_date").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url"),
+  contactInfo: text("contact_info").notNull(),
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const insertLostPetSightingSchema = createInsertSchema(lostPetSightings).pick({
+  lostPetId: true,
+  reportedByUserId: true,
+  location: true,
+  sightingDate: true,
+  description: true,
+  imageUrl: true,
+  contactInfo: true,
+  isVerified: true
+});
+
+export type LostPet = typeof lostPets.$inferSelect;
+export type InsertLostPet = z.infer<typeof insertLostPetSchema>;
+
+export type LostPetSighting = typeof lostPetSightings.$inferSelect;
+export type InsertLostPetSighting = z.infer<typeof insertLostPetSightingSchema>;
