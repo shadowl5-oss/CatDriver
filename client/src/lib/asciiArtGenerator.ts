@@ -6,13 +6,23 @@
  */
 
 type CatTrait = {
-  rarity: string;
-  pattern: string;
-  eyeStyle: string;
-  whiskerStyle: string;
-  special: boolean;
-  expression: string;
-  accessories: string[];
+  rarity: string;              // Common, Rare, Epic, Legendary
+  pattern: string;             // striped, spotted, tabby, calico, quantum, none
+  eyeStyle: string;            // normal, quantum, binary, slit, wide
+  whiskerStyle: string;        // straight, curly, long, short, quantum
+  special: boolean;            // true/false - has special traits
+  expression: string;          // happy, sad, surprised, grumpy, wise, mischievous, neutral
+  accessories: string[];       // hat, bowtie, glasses, collar, etc.
+  furLength?: string;          // short, medium, long, fluffy
+  earShape?: string;           // pointed, rounded, folded, tufted
+  tailType?: string;           // long, short, fluffy, curled
+  pawStyle?: string;           // normal, mittened, polydactyl, gradient
+  muzzleShape?: string;        // round, square, elongated, heart
+  facialMarkings?: string[];   // mask, stripe, spot, blaze, none
+  bitcoinFeatures?: boolean;   // true/false - has Bitcoin-specific features
+  quantumState?: string;       // observed, unobserved, superposition, entangled
+  blockhash?: string;          // Bitcoin block hash for generation
+  cypherpunkTraits?: string[]; // privacy, encryption, resistance, anonymity traits
 };
 
 type ASCIIOptions = {
@@ -42,7 +52,17 @@ export function generateCatASCII(traits: Partial<CatTrait> = {}, options: Partia
     whiskerStyle: traits.whiskerStyle || 'short',
     special: traits.special || false,
     expression: traits.expression || 'neutral',
-    accessories: traits.accessories || []
+    accessories: traits.accessories || [],
+    furLength: traits.furLength || 'medium',
+    earShape: traits.earShape || 'pointed',
+    tailType: traits.tailType || 'long',
+    pawStyle: traits.pawStyle || 'normal',
+    muzzleShape: traits.muzzleShape || 'round',
+    facialMarkings: traits.facialMarkings || ['none'],
+    bitcoinFeatures: traits.bitcoinFeatures || false,
+    quantumState: traits.quantumState || 'unobserved',
+    blockhash: traits.blockhash || '',
+    cypherpunkTraits: traits.cypherpunkTraits || []
   };
   
   // Generate the ASCII art
@@ -119,69 +139,107 @@ function generateHead(traits: CatTrait, options: ASCIIOptions): string {
   let head = '';
   let ears = '';
   let face = '';
+  let eyes = '';
+  let nose = '';
   let mouth = '';
+  let whiskers = '';
   
   // Generate ears based on rarity
   switch (rarity) {
     case 'Legendary':
-      ears = '   /\\     /\\   ';
+      ears = '    /\\___/\\    ';
       break;
     case 'Epic':
-      ears = '   /\\\\   //\\   ';
+      ears = '   /\\\\___/\\\\   ';
       break;
     case 'Rare':
-      ears = '   /\\     /\\   ';
+      ears = '    /\\~~/\\    ';
       break;
     case 'Common':
     default:
-      ears = '   /\\     /\\   ';
-      break;
-  }
-  
-  // Generate eyes based on eyeStyle
-  let eyes = '';
-  switch (eyeStyle) {
-    case 'quantum':
-      eyes = '  ⊛   ⊛  ';
-      break;
-    case 'binary':
-      eyes = '  1   0  ';
-      break;
-    case 'normal':
-    default:
-      eyes = '  •   •  ';
+      ears = '    /\\   /\\    ';
       break;
   }
   
   // Generate face
-  face = ' /       \\ ';
+  face = '   /       \\   ';
+  
+  // Generate eyes based on eyeStyle
+  switch (eyeStyle) {
+    case 'quantum':
+      eyes = '  ⊛  ⦿  ⊛  ';
+      break;
+    case 'binary':
+      eyes = '  1  ⋄  0  ';
+      break;
+    case 'slit':
+      eyes = '  >  ⋄  <  ';
+      break;
+    case 'wide':
+      eyes = '  ⦿  ⋄  ⦿  ';
+      break;
+    case 'normal':
+    default:
+      eyes = '  •  ⋄  •  ';
+      break;
+  }
+  
+  // Generate nose
+  nose = '     ▼     ';
   
   // Generate mouth based on expression
   switch (expression) {
     case 'happy':
-      mouth = ' \\  ‿  / ';
+      mouth = '    ⟋⌓⟍    ';
       break;
     case 'sad':
-      mouth = ' \\  ⌒  / ';
+      mouth = '    ⌒︿⌒    ';
       break;
     case 'surprised':
-      mouth = ' \\  O  / ';
+      mouth = '     O     ';
+      break;
+    case 'grumpy':
+      mouth = '    ﹏﹏    ';
       break;
     case 'wise':
-      mouth = ' \\  ω  / ';
+      mouth = '    =ω=    ';
+      break;
+    case 'mischievous':
+      mouth = '    ⌒ω⌒    ';
       break;
     case 'neutral':
     default:
-      mouth = ' \\  _  / ';
+      mouth = '    =⌓=    ';
       break;
   }
   
-  // Combine parts to form head
-  head = centerLine(ears, width) + '\n' + 
-         centerLine(face, width) + '\n' + 
-         centerLine(eyes, width) + '\n' + 
-         centerLine(' |  ^  | ', width) + '\n' + 
-         centerLine(mouth, width);
+  // Generate whiskers
+  if (detailLevel === 'high') {
+    whiskers = ' \\==// \\==// ';
+  } else {
+    whiskers = ' \\=/ ● \\=/ ';
+  }
+  
+  // Combine parts to form head based on detail level
+  if (detailLevel === 'high') {
+    head = centerLine(ears, width) + '\n' + 
+           centerLine(face, width) + '\n' + 
+           centerLine(eyes, width) + '\n' + 
+           centerLine(nose, width) + '\n' + 
+           centerLine(mouth, width) + '\n' + 
+           centerLine(whiskers, width);
+  } else if (detailLevel === 'medium') {
+    head = centerLine(ears, width) + '\n' + 
+           centerLine(face, width) + '\n' + 
+           centerLine(eyes, width) + '\n' + 
+           centerLine(nose, width) + '\n' + 
+           centerLine(mouth, width);
+  } else {
+    head = centerLine(ears, width) + '\n' + 
+           centerLine(face, width) + '\n' + 
+           centerLine(eyes, width) + '\n' + 
+           centerLine(mouth, width);
+  }
   
   return head;
 }
@@ -195,9 +253,7 @@ function generateBody(traits: CatTrait, options: ASCIIOptions): string {
   
   let body = '';
   let patternChars = '';
-  
-  // Body shape
-  const topBody = '  \\_____/  ';
+  let bodyLines = [];
   
   // Generate pattern characters based on pattern type
   switch (pattern) {
@@ -205,13 +261,16 @@ function generateBody(traits: CatTrait, options: ASCIIOptions): string {
       patternChars = '~~~~~~~~~';
       break;
     case 'spotted':
-      patternChars = '* * * * *';
+      patternChars = '• • • • •';
       break;
     case 'tabby':
       patternChars = '≈≈≈≈≈≈≈≈≈';
       break;
     case 'quantum':
       patternChars = '⌁⌁⌁⌁⌁⌁⌁⌁⌁';
+      break;
+    case 'calico':
+      patternChars = '░▒░▒░▒░▒░';
       break;
     case 'none':
     default:
@@ -224,21 +283,60 @@ function generateBody(traits: CatTrait, options: ASCIIOptions): string {
     patternChars = '★' + patternChars.substring(1, patternChars.length - 1) + '★';
   }
   
-  // Higher detail levels add more body parts
+  // Different body shapes based on rarity
+  let neckLine, bodyLine, bellyLine, pawsLine, tailLine;
+  
+  // Neck connection
+  neckLine = '   \\_____/   ';
+  
+  // Body shape based on rarity
+  switch (rarity) {
+    case 'Legendary':
+      bodyLine = '  ╱|' + patternChars + '|╲  ';
+      bellyLine = ' ╱ |_______| ╲ ';
+      break;
+    case 'Epic':
+      bodyLine = '  /|' + patternChars + '|\\  ';
+      bellyLine = ' / |_______| \\ ';
+      break;
+    case 'Rare':
+      bodyLine = '   |' + patternChars + '|   ';
+      bellyLine = '   |_______|   ';
+      break;
+    case 'Common':
+    default:
+      bodyLine = '   |' + patternChars + '|   ';
+      bellyLine = '   \\_______/   ';
+      break;
+  }
+  
+  // Paws
   if (detailLevel === 'high') {
-    body = centerLine(topBody, width) + '\n' + 
-           centerLine(' |' + patternChars + '| ', width) + '\n' + 
-           centerLine(' | ^ ^ ^ | ', width) + '\n' + 
-           centerLine(' \\_|_|_|_/ ', width) + '\n' + 
-           centerLine('   | | |   ', width);
-  } else if (detailLevel === 'medium') {
-    body = centerLine(topBody, width) + '\n' + 
-           centerLine(' |' + patternChars + '| ', width) + '\n' + 
-           centerLine(' \\_______/ ', width);
+    pawsLine = ' ᶠᶠᶠ     ᶠᶠᶠ ';
+    tailLine = '     (_____)  ';
   } else {
-    body = centerLine(topBody, width) + '\n' + 
-           centerLine(' |       | ', width) + '\n' + 
-           centerLine(' \\_____/ ', width);
+    pawsLine = '  UU     UU  ';
+    tailLine = '     (~~)    ';
+  }
+  
+  // Assemble the body based on detail level
+  if (detailLevel === 'high') {
+    body = centerLine(neckLine, width) + '\n' + 
+           centerLine(bodyLine, width) + '\n' + 
+           centerLine('   |  ฅ^•ﻌ•^ฅ |   ', width) + '\n' + 
+           centerLine(bellyLine, width) + '\n' + 
+           centerLine(pawsLine, width) + '\n' + 
+           centerLine(tailLine, width);
+  } else if (detailLevel === 'medium') {
+    body = centerLine(neckLine, width) + '\n' + 
+           centerLine(bodyLine, width) + '\n' + 
+           centerLine('   | =(^.^)= |   ', width) + '\n' + 
+           centerLine(bellyLine, width) + '\n' + 
+           centerLine(pawsLine, width);
+  } else {
+    body = centerLine(neckLine, width) + '\n' + 
+           centerLine(bodyLine, width) + '\n' + 
+           centerLine(bellyLine, width);
   }
   
   return body;
@@ -274,13 +372,50 @@ function generateAccessories(traits: CatTrait, options: ASCIIOptions): string {
  */
 function generateTraitsInfo(traits: CatTrait, options: ASCIIOptions): string {
   const { width } = options;
-  const { rarity, pattern, special } = traits;
+  const { 
+    rarity, pattern, special, 
+    furLength, earShape, tailType, 
+    pawStyle, quantumState, bitcoinFeatures 
+  } = traits;
   
   const rarityInfo = `Rarity: ${rarity}`;
   const patternInfo = `Pattern: ${capitalize(pattern)}`;
   const specialInfo = special ? 'Special: Yes' : '';
   
-  const info = centerText(`${rarityInfo} | ${patternInfo}${special ? ' | ' + specialInfo : ''}`, width);
+  // Primary trait line (always shown)
+  let info = centerText(`${rarityInfo} | ${patternInfo}${special ? ' | ' + specialInfo : ''}`, width);
+  
+  // Additional trait lines based on detail level
+  if (options.detailLevel === 'high') {
+    // Physical traits
+    const physicalTraits = [
+      furLength ? `Fur: ${capitalize(furLength)}` : null,
+      earShape ? `Ears: ${capitalize(earShape)}` : null,
+      tailType ? `Tail: ${capitalize(tailType)}` : null,
+      pawStyle ? `Paws: ${capitalize(pawStyle)}` : null
+    ].filter(Boolean).join(' | ');
+    
+    if (physicalTraits) {
+      info += '\n' + centerText(physicalTraits, width);
+    }
+    
+    // Special features based on cat type
+    if (bitcoinFeatures) {
+      info += '\n' + centerText('Bitcoin Feature: Satoshi Ordinal', width);
+    }
+    
+    if (quantumState && quantumState !== 'unobserved') {
+      info += '\n' + centerText(`Quantum State: ${capitalize(quantumState)}`, width);
+    }
+    
+    if (traits.facialMarkings && traits.facialMarkings.length > 0 && !traits.facialMarkings.includes('none')) {
+      info += '\n' + centerText(`Markings: ${traits.facialMarkings.map(capitalize).join(', ')}`, width);
+    }
+    
+    if (traits.cypherpunkTraits && traits.cypherpunkTraits.length > 0) {
+      info += '\n' + centerText(`Cypherpunk: ${traits.cypherpunkTraits.map(capitalize).join(', ')}`, width);
+    }
+  }
   
   return info;
 }
@@ -453,21 +588,25 @@ function generateQuantumCatASCII(traits: Record<string, any>): string {
   ├${'─'.repeat(width - 4)}┤
   │${' '.repeat(Math.floor((width - 10) / 2))}⟨Ψ|Ψ⟩ = 1${' '.repeat(Math.ceil((width - 10) / 2))}│
   │${' '.repeat(width - 4)}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  /⊛\\   /⊛\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}│ ⫯   ⦿   ⫯ │${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ⫘___⫘  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |⌁⌁⌁⌁⌁⌁⌁|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |⎍⌁⎍⌁⎍⌁⎍|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /\\_____/\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   /  ⊛   ⊛  \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |   >  ⦿  <   |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |      ▼      |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   \\    =ω=    /   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    \\==// \\==//    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}     \\_____/     ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   ╱|⌁⌁⌁⌁⌁⌁⌁|╲   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |  ฅ^•ﻌ•^ฅ  |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  ╱ |_______| ╲  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  ᶠᶠᶠ    ᶠᶠᶠ  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}     (_____)     ${' '.repeat(Math.ceil((width - 18) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 49) / 2))}This cat exists in both alive and dead states simultaneously${' '.repeat(Math.ceil((width - 49) / 2))}│
   │${' '.repeat(Math.floor((width - 36) / 2))}until the block hash is observed by miners${' '.repeat(Math.ceil((width - 36) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
   │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  │${' '.repeat(Math.floor((width - 27) / 2))}Quantum State: Superposition${' '.repeat(Math.ceil((width - 27) / 2))}│
   ╰${'─'.repeat(width - 4)}╯
 `.trimStart();
   
@@ -483,23 +622,27 @@ function generateBitcoinCatASCII(traits: Record<string, any>): string {
   ╭${'─'.repeat(width - 4)}╮
   │${' '.repeat(Math.floor((width - 19) / 2))}BITCOIN ORDINAL CAT${' '.repeat(Math.ceil((width - 19) / 2))}│
   ├${'─'.repeat(width - 4)}┤
-  │${' '.repeat(Math.floor((width - 8) / 2))}₿ ₿ ₿ ₿${' '.repeat(Math.ceil((width - 8) / 2))}│
+  │${' '.repeat(Math.floor((width - 12) / 2))}₿₿₿₿₿₿₿₿₿₿₿₿${' '.repeat(Math.ceil((width - 12) / 2))}│
   │${' '.repeat(width - 4)}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  /₿\\   /₿\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}│ ⊙   ⊙   ⊙ │${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ₿___₿  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |₿₿₿₿₿₿₿|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |₿₿₿₿₿₿₿|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /\\_____/\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   /  ₿   ₿  \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |   ฿  *  ฿   |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |      ▼      |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   \\    ≈₿≈    /   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    \\=// ₿ \\=//    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}     \\_______/     ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /|₿₿₿₿₿₿₿|\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   / |₿ ₿ ₿ ₿ ₿| \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  /  |_______|  \\  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /ƒƒƒ  ƒƒƒ\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}      (~~~)      ${' '.repeat(Math.ceil((width - 18) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 47) / 2))}HODL this rare cat and watch your portfolio moon!${' '.repeat(Math.ceil((width - 47) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
   │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
   │${' '.repeat(Math.floor((width - 22) / 2))}Token ID: ${traits.tokenId || '0x1234'}${' '.repeat(Math.ceil((width - 22) / 2))}│
+  │${' '.repeat(Math.floor((width - 17) / 2))}Value: ${Math.floor(Math.random() * 10) + 1}.${Math.floor(Math.random() * 100)} BTC${' '.repeat(Math.ceil((width - 17) / 2))}│
   ╰${'─'.repeat(width - 4)}╯
 `.trimStart();
   
@@ -517,21 +660,25 @@ function generateCypherpunkCatASCII(traits: Record<string, any>): string {
   ├${'─'.repeat(width - 4)}┤
   │${' '.repeat(Math.floor((width - 32) / 2))}0x${Math.random().toString(16).substr(2, 24)}${' '.repeat(Math.ceil((width - 32) / 2))}│
   │${' '.repeat(width - 4)}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  /▓▓\\   /▓▓\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}│ §   §   § │${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ▓█_█▓  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |░▒▓█▓▒░|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |▓▒░░▒▓░|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /\\___/\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   /  ▓▓ ▓▓  \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |   §  §  §   |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |      ▼      |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   \\    ▓▓▓    /   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    \\==╳╳╳╳==//    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}     \\_______/     ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   ╱|░▒▓█▓▒░|╲   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |  |▓▒░░▒▓░|  |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  ╱ |_______| ╲  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  ▓▓▓     ▓▓▓  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}     (—_—)     ${' '.repeat(Math.ceil((width - 18) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 43) / 2))}Privacy is necessary for an open society${' '.repeat(Math.ceil((width - 43) / 2))}│
   │${' '.repeat(Math.floor((width - 34) / 2))}in the electronic age. - 94${' '.repeat(Math.ceil((width - 34) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
   │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  │${' '.repeat(Math.floor((width - 28) / 2))}PGP Key: ${Math.random().toString(16).substr(2, 8).toUpperCase()}${' '.repeat(Math.ceil((width - 28) / 2))}│
   ╰${'─'.repeat(width - 4)}╯
 `.trimStart();
   
@@ -553,26 +700,31 @@ function generateSchrodingerCatASCII(traits: Record<string, any>): string {
   │${' '.repeat(Math.floor((width - 10) / 2))}STATE: ${state}${' '.repeat(Math.ceil((width - 10) / 2))}│
   │${' '.repeat(width - 4)}│
 ${isAlive ? `
-  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  /◉\\   /◉\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}│ •   •   • │${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ω___ω  / ${' '.repeat(Math.ceil((width - 15) / 2))}│` : `
-  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  /xx\\   /xx\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}│ x   x   x │${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))} \\  _____  / ${' '.repeat(Math.ceil((width - 15) / 2))}│`}
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |_______|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  |_______|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
-  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /\\_____/\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   /  ◉   ◉  \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |   •  •  •   |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |      ▼      |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   \\    ωωω    /   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    \\=//  \\=//    ${' '.repeat(Math.ceil((width - 18) / 2))}│` : `
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /\\_____/\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   /  X   X  \\   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |   x  x  x   |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}  |      ▼      |  ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}   \\    ___    /   ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    \\=//  \\=//    ${' '.repeat(Math.ceil((width - 18) / 2))}│`}
+  │${' '.repeat(Math.floor((width - 18) / 2))}     \\_______/     ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    |       |    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    | □□□□□ |    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    |_______|    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}    /ɯɯɯ ɯɯɯ\\    ${' '.repeat(Math.ceil((width - 18) / 2))}│
+  │${' '.repeat(Math.floor((width - 18) / 2))}      (- -)      ${' '.repeat(Math.ceil((width - 18) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 53) / 2))}When you observe the cat, its wave function collapses${' '.repeat(Math.ceil((width - 53) / 2))}│
   │${' '.repeat(Math.floor((width - 49) / 2))}and it exists in one definite state: alive or dead${' '.repeat(Math.ceil((width - 49) / 2))}│
   │${' '.repeat(width - 4)}│
   │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
   │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  │${' '.repeat(Math.floor((width - 25) / 2))}Probability: ${isAlive ? '50%' : '50%'}${' '.repeat(Math.ceil((width - 25) / 2))}│
   ╰${'─'.repeat(width - 4)}╯
 `.trimStart();
   
