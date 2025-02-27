@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { CatNft } from '@/services/api';
-import { CatOrdinal, enrichCatNftWithOrdinalData, observeQuantumState } from '@/services/blockchain';
+import { 
+  CatOrdinal, 
+  enrichCatNftWithOrdinalData, 
+  observeQuantumState,
+  transferOrdinal,
+  generateWalletAddress 
+} from '@/services/blockchain';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger 
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 
 interface OrdinalDetailsProps {
   nft: CatNft;
@@ -69,6 +87,75 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  // States for the transfer dialog
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState('');
+  const [transferAmount, setTransferAmount] = useState(nft.price.toString());
+  const [transferProgress, setTransferProgress] = useState(0);
+  const [isTransferring, setIsTransferring] = useState(false);
+
+  // Handle the ordinal transfer
+  const handleTransfer = async () => {
+    if (!ordinalData || !recipientAddress) return;
+    
+    try {
+      setIsTransferring(true);
+      
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setTransferProgress(prev => {
+          if (prev >= 95) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + Math.floor(Math.random() * 10) + 1;
+        });
+      }, 500);
+      
+      // Call the blockchain service to transfer the ordinal
+      const transaction = await transferOrdinal(
+        ordinalData.tokenId,
+        recipientAddress,
+        parseFloat(transferAmount)
+      );
+      
+      clearInterval(progressInterval);
+      setTransferProgress(100);
+      
+      // Complete the transfer after a short delay to show 100% progress
+      setTimeout(() => {
+        setIsTransferring(false);
+        setTransferDialogOpen(false);
+        
+        toast({
+          title: 'Ordinal Transferred',
+          description: `Transaction ID: ${transaction.txId.substring(0, 8)}...`,
+        });
+        
+        // Reset the form
+        setRecipientAddress('');
+        setTransferAmount(nft.price.toString());
+        setTransferProgress(0);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error transferring ordinal:', error);
+      setIsTransferring(false);
+      
+      toast({
+        title: 'Transfer Failed',
+        description: 'There was an error transferring the ordinal.',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  // Generate a new wallet address for demonstration
+  const generateNewAddress = () => {
+    const newAddress = generateWalletAddress();
+    setRecipientAddress(newAddress);
   };
 
   return (
@@ -165,6 +252,29 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
             Each observation collapses the quantum wave function and can affect the ordinal's value.
           </p>
         </div>
+        
+        {/* Quantum effects visualization */}
+        {ordinalData?.quantumState === 'observed' && (
+          <div className="p-4 bg-secondary/10 rounded-md border border-secondary/20">
+            <h3 className="font-medium mb-2">Quantum Effects</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Coherence</h4>
+                <Progress value={65} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Determines stability and reliability of quantum properties
+                </p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Entanglement</h4>
+                <Progress value={43} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Connection with other quantum cat ordinals in the blockchain
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="flex justify-between">
@@ -172,7 +282,79 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
           <p className="text-sm text-muted-foreground">Current Value</p>
           <p className="text-xl font-bold">{nft.price} BTC</p>
         </div>
-        <Button disabled={loading}>Transfer Ordinal</Button>
+        
+        <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+          <DialogTrigger asChild>
+            <Button disabled={loading}>Transfer Ordinal</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Transfer Ordinal</DialogTitle>
+              <DialogDescription>
+                Transfer this ordinal to another Bitcoin wallet. This process will move the underlying satoshi.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="recipient">Recipient Address</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    id="recipient" 
+                    value={recipientAddress} 
+                    onChange={(e) => setRecipientAddress(e.target.value)}
+                    placeholder="Bitcoin address" 
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={generateNewAddress}
+                    type="button"
+                  >
+                    Generate
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="amount">Transfer Amount (BTC)</Label>
+                <Input 
+                  id="amount" 
+                  value={transferAmount} 
+                  onChange={(e) => setTransferAmount(e.target.value)}
+                  type="number" 
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+              
+              {isTransferring && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Transfer Progress</span>
+                    <span>{transferProgress}%</span>
+                  </div>
+                  <Progress value={transferProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {transferProgress < 30 ? "Initializing transfer..." : 
+                     transferProgress < 70 ? "Confirming on the Bitcoin network..." :
+                     "Finalizing quantum state transfer..."}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTransferDialogOpen(false)} disabled={isTransferring}>
+                Cancel
+              </Button>
+              <Button onClick={handleTransfer} disabled={!recipientAddress || isTransferring}>
+                {isTransferring ? 'Transferring...' : 'Transfer Ordinal'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );

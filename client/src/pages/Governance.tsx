@@ -217,6 +217,11 @@ export default function Governance() {
         </Card>
       </div>
       
+      {/* Quantum Theory */}
+      <div className="mb-8">
+        <Quantum />
+      </div>
+      
       {/* Proposals Tabs */}
       <Tabs defaultValue="active" className="mb-8">
         <TabsList className="mb-6">

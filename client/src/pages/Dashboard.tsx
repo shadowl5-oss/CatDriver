@@ -6,6 +6,7 @@ import AssetsList from "@/components/dashboard/AssetsList";
 import CatCollection from "@/components/dashboard/CatCollection";
 import GovernanceProposals from "@/components/dashboard/GovernanceProposals";
 import QuantumWallet from "@/components/dashboard/QuantumWallet";
+import BlockchainActivity from "@/components/dashboard/BlockchainActivity";
 import { enrichCatNftWithOrdinalData } from "@/services/blockchain";
 
 export default function Dashboard() {
@@ -90,8 +91,9 @@ export default function Dashboard() {
       </div>
       
       {/* Middle Row - Quantum Blockchain Features */}
-      <div className="mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <QuantumWallet />
+        <BlockchainActivity />
       </div>
       
       {/* Bottom Row */}
