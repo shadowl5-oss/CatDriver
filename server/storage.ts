@@ -491,7 +491,11 @@ export class PgStorage implements IStorage {
   }
   
   async createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio> {
-    const results = await this.db.insert(portfolios).values(portfolio).returning();
+    // Fix nullability issues
+    const nullableFields = ['growthChange', 'stakingRewards'];
+    const fixedPortfolio = fixNullability(portfolio, nullableFields);
+    
+    const results = await this.db.insert(portfolios).values(fixedPortfolio).returning();
     return results[0];
   }
   
@@ -505,7 +509,11 @@ export class PgStorage implements IStorage {
   }
   
   async addTokenPrice(tokenPrice: InsertTokenPrice): Promise<TokenPrice> {
-    const results = await this.db.insert(tokenPrices).values(tokenPrice).returning();
+    // Fix nullability issues
+    const nullableFields = ['volume'];
+    const fixedTokenPrice = fixNullability(tokenPrice, nullableFields);
+    
+    const results = await this.db.insert(tokenPrices).values(fixedTokenPrice).returning();
     return results[0];
   }
   
@@ -694,6 +702,9 @@ function fixNullability(obj: any, nullableFields: string[]): any {
   
   return result;
 }
+
+// Re-export the PgStorage class
+export { PgStorage };
 
 // Create and export the storage instance
 // Use PostgreSQL storage if DATABASE_URL is available, otherwise fall back to in-memory
