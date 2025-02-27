@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AsciiArtVisualizer from './AsciiArtVisualizer';
+import { generateAdvancedCatASCII } from '@/lib/asciiArtGenerator';
 
 const BITCOIN_PRICE_HISTORY = [
   { date: "2023-01-01", price: 16547 },
@@ -63,6 +64,7 @@ export default function OrdinalVisualizer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [quantumState, setQuantumState] = useState<'superposition' | 'entangled' | 'observed' | 'collapsed'>('superposition');
   const [currentTab, setCurrentTab] = useState('quantum');
+  const [showAsciiVisualizer, setShowAsciiVisualizer] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   // Use the provided blockHeight if available, otherwise use default
@@ -642,8 +644,22 @@ export default function OrdinalVisualizer({
   }, []);
   
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center' : ''}`}>
-      <div className={`bg-black rounded-xl overflow-hidden ${isFullscreen ? 'w-[90vw] max-w-5xl' : 'w-full'}`}>
+    <div>
+      {/* ASCII Art Visualizer Modal */}
+      {showAsciiVisualizer && (
+        <AsciiArtVisualizer
+          isFullscreen={true}
+          onClose={() => setShowAsciiVisualizer(false)}
+          blockHeight={bitcoinData.block}
+          rarity={catTraits.rarity}
+          ordinalId={ordinalId}
+          name={name}
+        />
+      )}
+      
+      {/* Main Visualizer Component */}
+      <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center' : ''}`}>
+        <div className={`bg-black rounded-xl overflow-hidden ${isFullscreen ? 'w-[90vw] max-w-5xl' : 'w-full'}`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Atom className="h-5 w-5 text-purple-500" />
@@ -741,7 +757,7 @@ export default function OrdinalVisualizer({
           
           <div className="space-y-6">
             <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="quantum" className="text-white data-[state=active]:bg-purple-900">
                   Quantum
                 </TabsTrigger>
@@ -750,6 +766,10 @@ export default function OrdinalVisualizer({
                 </TabsTrigger>
                 <TabsTrigger value="process" className="text-white data-[state=active]:bg-blue-900">
                   Process
+                </TabsTrigger>
+                <TabsTrigger value="ascii" className="text-white data-[state=active]:bg-green-900">
+                  <Terminal className="h-4 w-4 mr-1 inline-block" />
+                  ASCII
                 </TabsTrigger>
               </TabsList>
               
@@ -942,6 +962,49 @@ export default function OrdinalVisualizer({
                       ensuring uniqueness and cryptographic provenance.
                     </p>
                   </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="ascii" className="p-4 bg-green-950/50 rounded-lg border border-green-900 text-white">
+                <h3 className="font-bold mb-3">ASCII Art Visualization</h3>
+                <div className="space-y-4">
+                  <p className="text-sm">
+                    Each cat ordinal can be represented as ASCII art, preserving its unique attributes
+                    and blockchain-derived properties in text form.
+                  </p>
+                  
+                  {step === 3 ? (
+                    <div className="bg-black/50 p-4 rounded-lg font-mono text-xs text-green-400 overflow-auto max-h-60">
+                      <pre>
+                        {generateAdvancedCatASCII(catTraits.rarity, bitcoinData.block, quantumState)}
+                      </pre>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center p-8 bg-black/50 rounded-lg">
+                      <p className="text-gray-400 italic">
+                        Complete the visualization process to generate ASCII art
+                      </p>
+                    </div>
+                  )}
+                  
+                  {step === 3 && (
+                    <div className="pt-2 space-y-4">
+                      <p className="text-xs text-white/70">
+                        ASCII art preserves the cryptographic properties of the ordinal in a format
+                        that's viewable on any device, even those without graphical interfaces.
+                      </p>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full text-white border-white/20 hover:bg-white/10"
+                        onClick={() => setShowAsciiVisualizer(true)}
+                      >
+                        <Terminal className="h-4 w-4 mr-2" />
+                        Open Full ASCII Art Visualizer
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
