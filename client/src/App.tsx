@@ -9,6 +9,7 @@ import Marketplace from "@/pages/Marketplace";
 import Governance from "@/pages/Governance";
 import Staking from "@/pages/Staking";
 import Presentation from "@/pages/Presentation";
+import LostPets from "@/pages/LostPets";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/governance" component={Governance} />
       <Route path="/staking" component={Staking} />
       <Route path="/presentation" component={Presentation} />
+      <Route path="/lost-pets" component={LostPets} />
       <Route component={NotFound} />
     </Switch>
   );

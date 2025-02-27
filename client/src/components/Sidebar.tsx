@@ -19,6 +19,7 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
     { path: "/marketplace", label: "Marketplace", icon: "fa-store" },
     { path: "/governance", label: "Governance", icon: "fa-vote-yea" },
     { path: "/staking", label: "Staking", icon: "fa-layer-group" },
+    { path: "/lost-pets", label: "Lost Pets", icon: "fa-paw" },
     { path: "/presentation", label: "Presentation", icon: "fa-file-powerpoint" },
   ];
 

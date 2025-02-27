@@ -22,8 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import ReportLostPetForm from '@/components/lostpets/ReportLostPetForm';
-import PetDetails from '@/components/lostpets/PetDetails';
+import ReportLostPetForm from '@/components/ReportLostPetForm';
+import PetDetails from '@/components/PetDetails';
 import { format } from 'date-fns';
 
 export default function LostPets() {
