@@ -12,6 +12,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import OrdinalDetails from "@/components/OrdinalDetails";
+import { CatNft } from "@/services/api";
+import { observeQuantumState } from "@/services/blockchain";
 
 type Rarity = "All" | "Common" | "Rare" | "Epic" | "Legendary";
 type SortOption = "newest" | "oldest" | "price-asc" | "price-desc";
@@ -142,31 +146,55 @@ export default function Marketplace() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {sortedCats?.map((cat: any) => (
-                <Card key={cat.id} className="card-hover transition-all duration-300 overflow-hidden">
-                  <div className="aspect-square overflow-hidden">
-                    <img 
-                      src={cat.image} 
-                      alt={cat.name} 
-                      className="w-full h-full object-cover transition-transform hover:scale-110 duration-500" 
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-foreground font-semibold text-base">{cat.name}</h3>
-                      <Badge variant={getRarityBadgeVariant(cat.rarity)}>
-                        {cat.rarity}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <p className="text-muted-foreground text-sm">#{cat.tokenId.slice(-3)}</p>
-                      <p className="font-mono text-secondary">{cat.price} CDV</p>
-                    </div>
-                    <Button className="w-full mt-4">
-                      <i className="fas fa-shopping-cart mr-2"></i> Buy Now
-                    </Button>
-                  </CardContent>
-                </Card>
+              {sortedCats?.map((cat: CatNft) => (
+                <Dialog key={cat.id}>
+                  <DialogTrigger asChild>
+                    <Card className="card-hover transition-all duration-300 overflow-hidden cursor-pointer">
+                      <div className="aspect-square overflow-hidden">
+                        <img 
+                          src={cat.image} 
+                          alt={cat.name} 
+                          className="w-full h-full object-cover transition-transform hover:scale-110 duration-500" 
+                        />
+                        {localStorage.getItem(`observed_${cat.id}`) ? null : (
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                            <Badge className="absolute top-2 right-2 animate-pulse" variant="secondary">
+                              Unobserved
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-foreground font-semibold text-base">{cat.name}</h3>
+                          <Badge variant={getRarityBadgeVariant(cat.rarity)}>
+                            {cat.rarity}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-muted-foreground text-sm">#{cat.tokenId.slice(-3)}</p>
+                          <p className="font-mono text-secondary">{cat.price} BTC</p>
+                        </div>
+                        <div className="flex justify-between mt-4">
+                          <Button variant="outline" size="sm" onClick={(e) => {
+                            e.stopPropagation();
+                            observeQuantumState(cat.id);
+                            // Force re-render
+                            setSortOption(prev => prev);
+                          }}>
+                            <i className="fas fa-eye mr-2"></i> Observe
+                          </Button>
+                          <Button size="sm">
+                            <i className="fas fa-shopping-cart mr-2"></i> Buy
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[900px] p-0">
+                    <OrdinalDetails nft={cat} onBack={() => document.querySelector('[data-dismiss]')?.click()} />
+                  </DialogContent>
+                </Dialog>
               ))}
             </div>
           )}

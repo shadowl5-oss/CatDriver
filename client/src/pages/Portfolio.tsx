@@ -11,6 +11,8 @@ import {
   Tooltip,
   Legend
 } from "recharts";
+import BlockchainActivity from "@/components/dashboard/BlockchainActivity";
+import { generateWalletAddress } from "@/services/blockchain";
 
 export default function Portfolio() {
   const [activeTab, setActiveTab] = useState("allocation");
@@ -123,12 +125,32 @@ export default function Portfolio() {
         </CardContent>
       </Card>
       
+      {/* Blockchain Wallet */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            <span>Bitcoin Wallet</span>
+            <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(generateWalletAddress())}>
+              <i className="fas fa-copy mr-2"></i>
+              Copy Address
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="font-mono text-sm p-3 bg-muted rounded-md overflow-auto">
+            {generateWalletAddress()}
+          </div>
+          <BlockchainActivity />
+        </CardContent>
+      </Card>
+      
       {/* Portfolio Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="mb-6">
           <TabsTrigger value="allocation">Asset Allocation</TabsTrigger>
           <TabsTrigger value="transactions">Transaction History</TabsTrigger>
           <TabsTrigger value="performance">Historical Performance</TabsTrigger>
+          <TabsTrigger value="ordinals">Bitcoin Ordinals</TabsTrigger>
         </TabsList>
         
         <TabsContent value="allocation">
