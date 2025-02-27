@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bitcoin, Binary, Atom, Cpu, HardDrive, GitBranch, Zap, Cat, Box, Info } from 'lucide-react';
+import { Bitcoin, Binary, Atom, Cpu, HardDrive, GitBranch, Zap, Cat, Box, Info, Terminal, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import AsciiArtVisualizer from './AsciiArtVisualizer';
 
 const BITCOIN_PRICE_HISTORY = [
   { date: "2023-01-01", price: 16547 },
