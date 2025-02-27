@@ -118,7 +118,7 @@ export default function OrdinalDetails({ nft, onBack }: OrdinalDetailsProps) {
       const transaction = await transferOrdinal(
         ordinalData.tokenId,
         recipientAddress,
-        parseFloat(transferAmount)
+        parseFloat(transferAmount) || 0
       );
       
       clearInterval(progressInterval);
