@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import OrdinalDetails from "@/components/OrdinalDetails";
+import SimpleAsciiArt from "@/components/SimpleAsciiArt";
 import { CatNft } from "@/services/api";
 import { observeQuantumState } from "@/services/blockchain";
 
@@ -150,11 +151,14 @@ export default function Marketplace() {
                 <Dialog key={cat.id}>
                   <DialogTrigger asChild>
                     <Card className="card-hover transition-all duration-300 overflow-hidden cursor-pointer">
-                      <div className="aspect-square overflow-hidden">
-                        <img 
-                          src={cat.image} 
-                          alt={cat.name} 
-                          className="w-full h-full object-cover transition-transform hover:scale-110 duration-500" 
+                      <div className="aspect-square overflow-hidden bg-black flex items-center justify-center">
+                        <SimpleAsciiArt 
+                          type={cat.id % 4 === 0 ? "quantum" : 
+                                cat.id % 4 === 1 ? "bitcoin" : 
+                                cat.id % 4 === 2 ? "cypherpunk" : "schrodinger"}
+                          width={250}
+                          height={250}
+                          className="transition-transform hover:scale-105 duration-500"
                         />
                         {localStorage.getItem(`observed_${cat.id}`) ? null : (
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -246,7 +250,9 @@ export default function Marketplace() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="p-4 bg-muted rounded-lg flex items-center">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-full mr-4"></div>
+                    <div className="w-12 h-12 bg-black rounded-full mr-4 overflow-hidden flex items-center justify-center">
+                      <SimpleAsciiArt type="quantum" width={48} height={48} isProfileImage={true} />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold">Siamese #291</p>
                       <p className="text-xs text-muted-foreground">Sold 5 minutes ago</p>
@@ -257,7 +263,9 @@ export default function Marketplace() {
                   </div>
                   
                   <div className="p-4 bg-muted rounded-lg flex items-center">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-full mr-4"></div>
+                    <div className="w-12 h-12 bg-black rounded-full mr-4 overflow-hidden flex items-center justify-center">
+                      <SimpleAsciiArt type="bitcoin" width={48} height={48} isProfileImage={true} />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold">Sphinx #042</p>
                       <p className="text-xs text-muted-foreground">Sold 15 minutes ago</p>
@@ -268,7 +276,9 @@ export default function Marketplace() {
                   </div>
                   
                   <div className="p-4 bg-muted rounded-lg flex items-center">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-full mr-4"></div>
+                    <div className="w-12 h-12 bg-black rounded-full mr-4 overflow-hidden flex items-center justify-center">
+                      <SimpleAsciiArt type="cypherpunk" width={48} height={48} isProfileImage={true} />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold">Maine Coon #108</p>
                       <p className="text-xs text-muted-foreground">Sold 32 minutes ago</p>
@@ -279,7 +289,9 @@ export default function Marketplace() {
                   </div>
                   
                   <div className="p-4 bg-muted rounded-lg flex items-center">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-full mr-4"></div>
+                    <div className="w-12 h-12 bg-black rounded-full mr-4 overflow-hidden flex items-center justify-center">
+                      <SimpleAsciiArt type="schrodinger" width={48} height={48} isProfileImage={true} />
+                    </div>
                     <div className="flex-1">
                       <p className="font-semibold">Tabby #573</p>
                       <p className="text-xs text-muted-foreground">Sold 45 minutes ago</p>

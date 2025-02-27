@@ -1,6 +1,7 @@
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import CatLogo from "@/components/CatLogo";
+import SimpleAsciiArt from "@/components/SimpleAsciiArt";
 
 type SidebarProps = {
   isVisible?: boolean;
@@ -66,8 +67,13 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
         {/* User Info */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-              <i className="fas fa-user"></i>
+            <div className="w-10 h-10 rounded-full bg-black overflow-hidden flex items-center justify-center">
+              <SimpleAsciiArt 
+                type="quantum" 
+                width={40} 
+                height={40} 
+                isProfileImage={true}
+              />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium">

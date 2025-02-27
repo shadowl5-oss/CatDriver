@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import SimpleAsciiArt from "@/components/SimpleAsciiArt";
 
 type CatNft = {
   id: number;
@@ -51,11 +52,15 @@ export default function CatCollection() {
           <div className="grid grid-cols-2 gap-4">
             {catNfts?.map((cat: CatNft) => (
               <div key={cat.id} className="bg-muted rounded-lg overflow-hidden card-hover">
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-32 object-cover" 
-                />
+                <div className="w-full h-32 flex items-center justify-center bg-black">
+                  <SimpleAsciiArt 
+                    type={cat.id % 4 === 0 ? "quantum" : 
+                          cat.id % 4 === 1 ? "bitcoin" : 
+                          cat.id % 4 === 2 ? "cypherpunk" : "schrodinger"}
+                    width={150}
+                    height={110}
+                  />
+                </div>
                 <div className="p-3">
                   <p className="text-sm font-semibold text-white">{cat.name}</p>
                   <div className="flex justify-between items-center mt-2">
