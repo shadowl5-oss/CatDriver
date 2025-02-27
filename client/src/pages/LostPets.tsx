@@ -122,7 +122,10 @@ export default function LostPets() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lost Pet Finder</h1>
           <p className="text-muted-foreground mt-1">
-            Help reunite lost pets with their owners through our community-driven platform
+            Help reunite lost pets with their owners through CatDAO's community-driven platform. 
+            <a href="https://catdao.org" className="text-primary hover:underline ml-1" target="_blank" rel="noopener noreferrer">
+              Learn more at catdao.org
+            </a>
           </p>
         </div>
         <Button onClick={handleReportNew}>Report Lost Pet</Button>

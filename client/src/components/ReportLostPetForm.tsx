@@ -111,7 +111,8 @@ export default function ReportLostPetForm({ onCancel, onSuccess, userId }: Repor
       </Button>
 
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">Report a Lost Pet</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Report a Lost Pet</h1>
+        <p className="text-muted-foreground mb-6">CatDAO's community-driven lost pet reunification service. <a href="https://catdao.org" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Learn more at catdao.org</a></p>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

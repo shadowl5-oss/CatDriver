@@ -34,7 +34,10 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
           <div className="text-primary p-1 rounded-lg">
             <CatLogo width={36} height={36} />
           </div>
-          <h1 className="font-bold text-xl font-[Orbitron]">Cat<span className="text-primary">Driven</span></h1>
+          <div className="flex flex-col">
+            <h1 className="font-bold text-xl font-[Orbitron]">Cat<span className="text-primary">Driven</span></h1>
+            <a href="https://catdao.org" className="text-xs text-muted-foreground hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">catdao.org</a>
+          </div>
         </div>
         
         {/* Nav Links */}
