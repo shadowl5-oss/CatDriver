@@ -742,9 +742,9 @@ export class DatabaseStorage implements IStorage {
     
     if (existingUsers.length === 0) {
       const user = await this.createUser({
-        username: "cryptokitten",
+        username: "catdao",
         password: "password", // In a real app, this would be hashed
-        displayName: "Crypto Kitten",
+        displayName: "CatDAO Administrator",
         profileImage: "",
         isConnected: true
       });
@@ -904,7 +904,7 @@ export class DatabaseStorage implements IStorage {
           description: "Adult male orange tabby with white paws and chest. Friendly and responds to his name.",
           lastSeenLocation: "Central Park, near the East 72nd entrance",
           lastSeenDate: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          contactInfo: "Call or text 555-123-4567",
+          contactInfo: "Email: info@catdao.org",
           imageUrl: "https://i.pravatar.cc/300?img=5",
           rewardAmount: 100,
           isFound: false
@@ -915,7 +915,7 @@ export class DatabaseStorage implements IStorage {
           description: "Young female black cat with yellow eyes. Very shy and might hide if approached.",
           lastSeenLocation: "Brooklyn Heights, near the promenade",
           lastSeenDate: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-          contactInfo: "Email: findluna@example.com",
+          contactInfo: "Email: info@catdao.org",
           imageUrl: "https://i.pravatar.cc/300?img=6",
           rewardAmount: 200,
           isFound: false
@@ -935,7 +935,7 @@ export class DatabaseStorage implements IStorage {
               location: "Central Park, near Bethesda Fountain",
               sightingDate: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
               description: "Saw an orange cat that matches the description. It ran off when I approached.",
-              contactInfo: "Call me at 555-987-6543",
+              contactInfo: "Email: info@catdao.org",
               isVerified: false
             },
             {
@@ -945,7 +945,7 @@ export class DatabaseStorage implements IStorage {
               sightingDate: new Date(today.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
               description: "Orange tabby with white paws spotted in the morning, was eating from a food bowl left on a porch.",
               imageUrl: "https://i.pravatar.cc/300?img=7",
-              contactInfo: "Email: catlover@example.com",
+              contactInfo: "Email: info@catdao.org",
               isVerified: true
             }
           ];
