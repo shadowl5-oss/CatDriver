@@ -266,14 +266,36 @@ export default function Ordinals() {
                       <span className="font-bold">{ordinal.price} BTC</span>
                     </div>
                     
-                    <Button 
-                      variant={ordinal.isAvailable ? "default" : "outline"} 
-                      size="sm" 
-                      disabled={!ordinal.isAvailable}
-                      onClick={() => handleBuy(ordinal)}
-                    >
-                      {ordinal.isAvailable ? "Buy Now" : "Sold Out"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="bg-primary/10 border-0"
+                          >
+                            <Maximize2 className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden">
+                          <OrdinalVisualizer 
+                            ordinalId={ordinal.id.toString()} 
+                            name={ordinal.name}
+                            blockHeight={ordinal.blockHeight}
+                            rarity={ordinal.rarity}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <Button 
+                        variant={ordinal.isAvailable ? "default" : "outline"} 
+                        size="sm" 
+                        disabled={!ordinal.isAvailable}
+                        onClick={() => handleBuy(ordinal)}
+                      >
+                        {ordinal.isAvailable ? "Buy Now" : "Sold Out"}
+                      </Button>
+                    </div>
                   </CardFooter>
                 </Card>
               ))}

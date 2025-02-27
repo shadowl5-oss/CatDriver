@@ -44,17 +44,29 @@ const BITCOIN_HEADLINES = [
 interface OrdinalVisualizerProps {
   isFullscreen?: boolean;
   onClose?: () => void;
+  ordinalId?: string;
+  name?: string;
+  blockHeight?: number;
+  rarity?: string;
 }
 
-export default function OrdinalVisualizer({ isFullscreen = false, onClose }: OrdinalVisualizerProps) {
+export default function OrdinalVisualizer({ 
+  isFullscreen = false, 
+  onClose,
+  ordinalId, 
+  name, 
+  blockHeight, 
+  rarity 
+}: OrdinalVisualizerProps): JSX.Element {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [quantumState, setQuantumState] = useState<'superposition' | 'entangled' | 'observed' | 'collapsed'>('superposition');
   const [currentTab, setCurrentTab] = useState('quantum');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  // Use the provided blockHeight if available, otherwise use default
   const [bitcoinData, setBitcoinData] = useState({
-    block: 831045,
+    block: blockHeight || 831045,
     transactions: 3791,
     fees: 2.14,
     price: 61742,
@@ -69,8 +81,9 @@ export default function OrdinalVisualizer({ isFullscreen = false, onClose }: Ord
       phase: 0
     }
   });
+  // Use the provided rarity if available
   const [catTraits, setCatTraits] = useState({
-    rarity: 'Unknown',
+    rarity: rarity || 'Unknown',
     color: '#333',
     eyeColor: '#00ff00',
     pattern: 'none',
@@ -557,9 +570,9 @@ export default function OrdinalVisualizer({ isFullscreen = false, onClose }: Ord
     setStep(0);
     setQuantumState('superposition');
     
-    // Reset the cat traits
+    // Reset the cat traits but preserve the rarity if provided as a prop
     setCatTraits({
-      rarity: 'Unknown',
+      rarity: rarity || 'Unknown',
       color: '#333',
       eyeColor: '#00ff00',
       pattern: 'none',
@@ -592,6 +605,14 @@ export default function OrdinalVisualizer({ isFullscreen = false, onClose }: Ord
     setIsPlaying(false);
     setStep(0);
     setQuantumState('superposition');
+    
+    // Also update the bitcoin data to use the provided blockHeight if available
+    if (blockHeight) {
+      setBitcoinData(prev => ({
+        ...prev,
+        block: blockHeight
+      }));
+    }
     
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
