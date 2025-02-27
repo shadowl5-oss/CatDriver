@@ -12,6 +12,7 @@ import Presentation from "@/pages/Presentation";
 import LostPets from "@/pages/LostPets";
 import Explorer from "@/pages/Explorer";
 import Ordinals from "@/pages/Ordinals";
+import Wallet from "@/pages/Wallet";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/lost-pets" component={LostPets} />
       <Route path="/explorer" component={Explorer} />
       <Route path="/ordinals" component={Ordinals} />
+      <Route path="/wallet" component={Wallet} />
       <Route component={NotFound} />
     </Switch>
   );

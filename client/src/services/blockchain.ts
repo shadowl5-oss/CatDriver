@@ -1,7 +1,8 @@
-import { queryClient } from "@/lib/queryClient";
-import { CatNft } from "./api";
+import { ethers } from 'ethers';
+import { CatNft } from '@/services/api';
+import { queryClient } from '@/lib/queryClient';
 
-// Types for blockchain interactions
+// Mock data from the existing API
 export type BlockchainTransaction = {
   txId: string;
   fromAddress: string;
@@ -31,176 +32,405 @@ export type CatOrdinal = CatNft & {
   quantumState: 'observed' | 'unobserved';
 };
 
-// Mock Bitcoin blockchain data for development
-// In production, this would connect to actual Bitcoin APIs
-const MOCK_ADDRESSES = {
-  project: 'bc1qxyz123456789abcdef',
-  treasury: 'bc1qabc987654321xyzdef',
-};
+// Interface for a blockchain provider
+export interface BlockchainProvider {
+  connect(): Promise<string>; // Connect and return the address
+  disconnect(): Promise<void>;
+  getBalance(address?: string): Promise<number>;
+  getAddress(): string | null;
+  isConnected(): boolean;
+  sendTransaction(to: string, amount: number): Promise<BlockchainTransaction>;
+  transferNFT(tokenId: string, to: string): Promise<BlockchainTransaction>;
+  observeNFT(tokenId: string): Promise<void>;
+  signMessage(message: string): Promise<string>;
+}
 
-const MOCK_ORDINALS: OrdinalInscription[] = Array.from({ length: 20 }).map((_, i) => ({
-  id: `ord${i.toString().padStart(8, '0')}`,
-  number: i + 1,
-  contentType: 'image/jpeg',
-  content: `cat_ordinal_${i}.jpg`,
-  timestamp: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-  satoshi: 20000000 + i,
-  block: 800000 + Math.floor(i / 5),
-}));
+// Base abstract class for different blockchain providers
+abstract class BaseBlockchainProvider implements BlockchainProvider {
+  protected address: string | null = null;
+  protected provider: any = null;
+  protected signer: any = null;
+  
+  abstract connect(): Promise<string>;
+  abstract disconnect(): Promise<void>;
+  abstract getBalance(address?: string): Promise<number>;
+  abstract sendTransaction(to: string, amount: number): Promise<BlockchainTransaction>;
+  abstract transferNFT(tokenId: string, to: string): Promise<BlockchainTransaction>;
+  abstract observeNFT(tokenId: string): Promise<void>;
+  abstract signMessage(message: string): Promise<string>;
+  
+  getAddress(): string | null {
+    return this.address;
+  }
+  
+  isConnected(): boolean {
+    return !!this.address;
+  }
+}
 
-// Functions to interact with blockchain data
+// Ethereum implementation of blockchain provider
+export class EthereumProvider extends BaseBlockchainProvider {
+  private static instance: EthereumProvider;
+  private networkName: string = 'localhost';
+  private chainId: number = 1337; // Default to localhost
+  private tokenContract: any = null;
+  private nftContract: any = null;
+  
+  private constructor() {
+    super();
+    
+    // Check if window.ethereum exists
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      this.provider = new ethers.BrowserProvider((window as any).ethereum);
+    } else {
+      // Fallback to a JSON RPC provider for testing
+      this.provider = new ethers.JsonRpcProvider('http://localhost:8545');
+    }
+  }
+  
+  public static getInstance(): EthereumProvider {
+    if (!EthereumProvider.instance) {
+      EthereumProvider.instance = new EthereumProvider();
+    }
+    return EthereumProvider.instance;
+  }
+  
+  async connect(): Promise<string> {
+    try {
+      // Request account access
+      this.signer = await this.provider.getSigner();
+      this.address = await this.signer.getAddress();
+      
+      // Initialize contracts
+      await this.initializeContracts();
+      
+      return this.address;
+    } catch (error) {
+      console.error('Error connecting to Ethereum:', error);
+      throw error;
+    }
+  }
+  
+  async disconnect(): Promise<void> {
+    this.address = null;
+    this.signer = null;
+  }
+  
+  async getBalance(address?: string): Promise<number> {
+    const targetAddress = address || this.address;
+    if (!targetAddress) throw new Error('No address specified');
+    
+    const balance = await this.provider.getBalance(targetAddress);
+    return parseFloat(ethers.formatEther(balance));
+  }
+  
+  async sendTransaction(to: string, amount: number): Promise<BlockchainTransaction> {
+    if (!this.signer) throw new Error('Not connected');
+    
+    try {
+      // Convert amount to wei
+      const amountInWei = ethers.parseEther(amount.toString());
+      
+      // Send transaction
+      const tx = await this.signer.sendTransaction({
+        to,
+        value: amountInWei
+      });
+      
+      // Wait for transaction to be mined
+      const receipt = await tx.wait();
+      
+      return {
+        txId: tx.hash,
+        fromAddress: this.address || '',
+        toAddress: to,
+        amount,
+        fee: parseFloat(ethers.formatEther(receipt.gasUsed * receipt.gasPrice)),
+        timestamp: new Date().toISOString(),
+        status: 'confirmed',
+        confirmations: 1
+      };
+    } catch (error) {
+      console.error('Error sending transaction:', error);
+      throw error;
+    }
+  }
+  
+  async transferNFT(tokenId: string, to: string): Promise<BlockchainTransaction> {
+    if (!this.signer || !this.nftContract) throw new Error('Not connected or contracts not initialized');
+    
+    try {
+      // Transfer NFT
+      const tx = await this.nftContract.transferFrom(this.address, to, tokenId);
+      
+      // Wait for transaction to be mined
+      const receipt = await tx.wait();
+      
+      return {
+        txId: tx.hash,
+        fromAddress: this.address || '',
+        toAddress: to,
+        amount: 0,
+        fee: parseFloat(ethers.formatEther(receipt.gasUsed * receipt.gasPrice)),
+        timestamp: new Date().toISOString(),
+        status: 'confirmed',
+        confirmations: 1
+      };
+    } catch (error) {
+      console.error('Error transferring NFT:', error);
+      throw error;
+    }
+  }
+  
+  async observeNFT(tokenId: string): Promise<void> {
+    // Set the NFT observed in local storage to avoid complex contract interactions for demo
+    localStorage.setItem(`observed_${tokenId}`, 'true');
+    
+    // Invalidate React Query cache to trigger re-renders
+    queryClient.invalidateQueries({ queryKey: ['/api/cat-nfts'] });
+  }
+  
+  async signMessage(message: string): Promise<string> {
+    if (!this.signer) throw new Error('Not connected');
+    
+    try {
+      return await this.signer.signMessage(message);
+    } catch (error) {
+      console.error('Error signing message:', error);
+      throw error;
+    }
+  }
+  
+  private async initializeContracts() {
+    // In a real application, you would load the contract ABIs and addresses here
+    // This is a placeholder for demonstration purposes
+    
+    // Token contract ABI and address would be loaded here
+    // this.tokenContract = new ethers.Contract(tokenAddress, tokenAbi, this.signer);
+    
+    // NFT contract ABI and address would be loaded here
+    // this.nftContract = new ethers.Contract(nftAddress, nftAbi, this.signer);
+  }
+  
+  // Helper method to switch networks if needed
+  async switchNetwork(chainId: number): Promise<void> {
+    this.chainId = chainId;
+    
+    // Different chain IDs and their names
+    const networks: Record<number, string> = {
+      1: 'mainnet',
+      3: 'ropsten',
+      4: 'rinkeby',
+      5: 'goerli',
+      42: 'kovan',
+      137: 'polygon',
+      1337: 'localhost'
+    };
+    
+    this.networkName = networks[chainId] || 'unknown';
+    
+    // Switch network if using MetaMask
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: `0x${chainId.toString(16)}` }]
+        });
+      } catch (error) {
+        console.error('Error switching network:', error);
+        throw error;
+      }
+    }
+  }
+}
 
-/**
- * Fetch Bitcoin blockchain data for a specific ordinal
- */
+// Bitcoin-specific provider (mock for demo purposes)
+export class BitcoinProvider extends BaseBlockchainProvider {
+  private static instance: BitcoinProvider;
+  
+  private constructor() {
+    super();
+    // Initialize with mock provider
+    this.provider = { /* Mock Bitcoin provider */ };
+  }
+  
+  public static getInstance(): BitcoinProvider {
+    if (!BitcoinProvider.instance) {
+      BitcoinProvider.instance = new BitcoinProvider();
+    }
+    return BitcoinProvider.instance;
+  }
+  
+  async connect(): Promise<string> {
+    // Mock connection to Bitcoin wallet
+    this.address = generateWalletAddress();
+    return this.address;
+  }
+  
+  async disconnect(): Promise<void> {
+    this.address = null;
+  }
+  
+  async getBalance(address?: string): Promise<number> {
+    // Mock balance - would connect to Bitcoin node in real implementation
+    return Math.random() * 10;
+  }
+  
+  async sendTransaction(to: string, amount: number): Promise<BlockchainTransaction> {
+    // Mock transaction
+    const txId = '0x' + Math.random().toString(16).substr(2, 40);
+    
+    return {
+      txId,
+      fromAddress: this.address || '',
+      toAddress: to,
+      amount,
+      fee: 0.0001,
+      timestamp: new Date().toISOString(),
+      status: 'confirmed',
+      confirmations: 1
+    };
+  }
+  
+  async transferNFT(tokenId: string, to: string): Promise<BlockchainTransaction> {
+    // Mock NFT transfer
+    return await transferOrdinal(parseInt(tokenId), to, 0);
+  }
+  
+  async observeNFT(tokenId: string): Promise<void> {
+    // Mock observation
+    localStorage.setItem(`observed_${tokenId}`, 'true');
+  }
+  
+  async signMessage(message: string): Promise<string> {
+    // Mock signature
+    return '0x' + Math.random().toString(16).substr(2, 64);
+  }
+}
+
+// Factory function to get the appropriate blockchain provider
+export function getBlockchainProvider(type: 'ethereum' | 'bitcoin' = 'ethereum'): BlockchainProvider {
+  switch (type) {
+    case 'ethereum':
+      return EthereumProvider.getInstance();
+    case 'bitcoin':
+      return BitcoinProvider.getInstance();
+    default:
+      throw new Error(`Unsupported blockchain type: ${type}`);
+  }
+}
+
+// Helper functions from previous implementation
+
 export const fetchOrdinalData = async (tokenId: string): Promise<OrdinalInscription | null> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  // In a real implementation, this would call an actual Bitcoin ordinal indexer API
-  const mockOrdinal = MOCK_ORDINALS.find(o => o.id === tokenId);
-  return mockOrdinal || null;
-};
-
-/**
- * Get Bitcoin price at a specific block height
- */
-export const getBitcoinPriceAtBlock = async (blockHeight: number): Promise<number> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 200));
-  
-  // Mock BTC price data based on block height
-  // In production, this would query historical price APIs
-  const basePrice = 50000;
-  const variance = (blockHeight % 100) / 100 * 10000;
-  return basePrice + variance;
-};
-
-/**
- * Enrich Cat NFT with Bitcoin ordinal data
- */
-export const enrichCatNftWithOrdinalData = async (nft: CatNft): Promise<CatOrdinal> => {
-  // For now, we're mapping tokenId to ordinalId
-  // In production, there would be a proper mapping stored on-chain
-  const ordinalId = nft.tokenId.replace('CAT', 'ord').padStart(10, '0');
-  
-  // Fetch ordinal data (or use mock data for development)
-  const ordinalData = await fetchOrdinalData(ordinalId) || {
-    id: ordinalId,
-    number: parseInt(nft.tokenId.replace('CAT', ''), 10),
-    contentType: 'image/jpeg',
-    content: nft.image,
+  // Mock data for demonstration
+  return {
+    id: `inscription-${tokenId}`,
+    number: parseInt(tokenId) * 1000 + Math.floor(Math.random() * 1000),
+    contentType: 'text/plain',
+    content: `Cat Ordinal #${tokenId}`,
     timestamp: new Date().toISOString(),
-    satoshi: 2100000000 - parseInt(nft.tokenId.replace('CAT', ''), 10) * 100,
-    block: 800000 + parseInt(nft.tokenId.replace('CAT', ''), 10) % 1000,
+    satoshi: 34500000000 + parseInt(tokenId),
+    block: 830000 + parseInt(tokenId)
   };
+};
+
+export const getBitcoinPriceAtBlock = async (blockHeight: number): Promise<number> => {
+  // Mock data for demonstration
+  return 60000 + Math.random() * 10000;
+};
+
+export const enrichCatNftWithOrdinalData = async (nft: CatNft): Promise<CatOrdinal> => {
+  const ordinalData = await fetchOrdinalData(nft.tokenId);
+  const blockHeight = 830000 + parseInt(nft.tokenId);
+  const btcPrice = await getBitcoinPriceAtBlock(blockHeight);
   
-  // Get Bitcoin price at the block when this ordinal was created
-  const btcPrice = await getBitcoinPriceAtBlock(ordinalData.block);
+  const isObserved = localStorage.getItem(`observed_${nft.id}`) === 'true';
   
-  // Apply quantum mechanics inspired logic - Schrödinger's cat
-  // The NFT exists in a superposition until observed in the marketplace
-  const lastObserved = localStorage.getItem(`observed_${nft.id}`);
-  const quantumState = lastObserved ? 'observed' : 'unobserved';
-  
-  // Convert to CatOrdinal type with enriched blockchain data
   return {
     ...nft,
-    ordinalData,
-    blockHeight: ordinalData.block,
+    ordinalData: ordinalData!,
+    blockHeight,
     btcPrice,
-    inscriptionDate: ordinalData.timestamp,
-    quantumState,
+    inscriptionDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    quantumState: isObserved ? 'observed' : 'unobserved'
   };
 };
 
-/**
- * Transfer an ordinal to a new owner
- */
 export const transferOrdinal = async (
-  nftId: number,
-  fromAddress: string,
-  toAddress: string
+  tokenId: number,
+  toAddress: string,
+  amount: number = 0
 ): Promise<BlockchainTransaction> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Mock transaction for demonstration
+  await new Promise(resolve => setTimeout(resolve, 2000));
   
-  // In production, this would initiate an actual on-chain transaction
   const transaction: BlockchainTransaction = {
-    txId: `tx${Math.random().toString(36).substring(2, 12)}`,
-    fromAddress,
+    txId: `tx-${Math.random().toString(36).substring(2, 15)}`,
+    fromAddress: 'bc1q3v5cu93qvl8zr96vq2cjr0qmx7slcjuym2n8eu',
     toAddress,
-    amount: 1, // 1 ordinal
-    fee: 0.0001, // Mock transaction fee
+    amount,
+    fee: 0.0001,
     timestamp: new Date().toISOString(),
     status: 'confirmed',
-    confirmations: 1,
+    confirmations: 1
   };
-  
-  // Invalidate NFT cache to reflect ownership change
-  queryClient.invalidateQueries({ queryKey: ['/api/nfts'] });
-  queryClient.invalidateQueries({ queryKey: ['/api/user-nfts'] });
   
   return transaction;
 };
 
-/**
- * Generate a new wallet address for a user
- */
 export const generateWalletAddress = (): string => {
-  // In production, this would use proper cryptographic methods
-  // For development, we just generate a mock Bitcoin address
-  return `bc1q${Math.random().toString(36).substring(2, 10)}`;
+  // Generate a random Bitcoin-like address for demonstration
+  return `bc1q${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
 };
 
-/**
- * Apply Schrödinger's cat-inspired quantum mechanics to NFTs
- */
 export const observeQuantumState = (nftId: number): 'observed' | 'unobserved' => {
-  // Record the observation in local storage
-  localStorage.setItem(`observed_${nftId}`, Date.now().toString());
+  // Store the observation in localStorage
+  localStorage.setItem(`observed_${nftId}`, 'true');
   
-  // In a quantum-inspired system, observation collapses the wave function
-  // This would influence rarity or properties in a real implementation
+  // Return the observed state
   return 'observed';
 };
 
-/**
- * Get the CatDAO treasury balance
- */
 export const getTreasuryBalance = async (): Promise<{ btc: number; usd: number }> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 400));
-  
-  // In production, this would query the actual treasury address balance
-  const btcBalance = 13.37; // Mock BTC balance
-  const btcPrice = await getBitcoinPriceAtBlock(800000);
-  
   return {
-    btc: btcBalance,
-    usd: btcBalance * btcPrice,
+    btc: 156.42,
+    usd: 9245000
   };
 };
 
-/**
- * Get transaction history for a user's wallet
- */
 export const getTransactionHistory = async (walletAddress?: string): Promise<BlockchainTransaction[]> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 600));
-  
-  // In production, this would query the blockchain for real transactions
-  // For development, we generate mock transaction history
-  const address = walletAddress || MOCK_ADDRESSES.project;
-  
-  return Array.from({ length: 8 }).map((_, i) => ({
-    txId: `tx${Math.random().toString(36).substring(2, 12)}`,
-    fromAddress: i % 3 === 0 ? address : MOCK_ADDRESSES.treasury,
-    toAddress: i % 3 === 0 ? MOCK_ADDRESSES.treasury : address,
-    amount: (Math.random() * 0.5 + 0.01),
-    fee: 0.00001 * (i + 1),
-    timestamp: new Date(Date.now() - (i * 86400000 * (Math.random() * 3 + 1))).toISOString(),
-    status: 'confirmed',
-    confirmations: Math.floor(Math.random() * 100) + 1,
-  }));
+  // Mock transaction history for demonstration
+  return [
+    {
+      txId: '0x' + Math.random().toString(16).substr(2, 40),
+      fromAddress: walletAddress || 'bc1q3v5cu93qvl8zr96vq2cjr0qmx7slcjuym2n8eu',
+      toAddress: 'bc1q' + Math.random().toString(16).substr(2, 30),
+      amount: 1.2,
+      fee: 0.0001,
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      status: 'confirmed',
+      confirmations: 12
+    },
+    {
+      txId: '0x' + Math.random().toString(16).substr(2, 40),
+      fromAddress: 'bc1q' + Math.random().toString(16).substr(2, 30),
+      toAddress: walletAddress || 'bc1q3v5cu93qvl8zr96vq2cjr0qmx7slcjuym2n8eu',
+      amount: 0.5,
+      fee: 0.0001,
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      status: 'confirmed',
+      confirmations: 142
+    },
+    {
+      txId: '0x' + Math.random().toString(16).substr(2, 40),
+      fromAddress: walletAddress || 'bc1q3v5cu93qvl8zr96vq2cjr0qmx7slcjuym2n8eu',
+      toAddress: 'bc1q' + Math.random().toString(16).substr(2, 30),
+      amount: 0.3,
+      fee: 0.0001,
+      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'confirmed',
+      confirmations: 380
+    }
+  ];
 };
