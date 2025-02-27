@@ -318,7 +318,7 @@ export default function Presentation() {
                     className="w-full p-2 rounded-md bg-muted border border-border"
                     value={slides[currentSlide].type}
                     // In a real app, we would update the slide type here
-                    readOnly
+                    disabled
                   >
                     <option value="intro">Introduction</option>
                     <option value="metrics">Metrics</option>

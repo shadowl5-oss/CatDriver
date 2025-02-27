@@ -1,5 +1,6 @@
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import CatLogo from "@/components/CatLogo";
 
 type SidebarProps = {
   isVisible?: boolean;
@@ -29,10 +30,10 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
       <div className="h-full flex flex-col">
         {/* Logo */}
         <div className="p-4 flex items-center space-x-2 border-b border-border">
-          <div className="cat-gradient text-white p-2 rounded-lg">
-            <i className="fas fa-cat text-xl"></i>
+          <div className="text-primary p-1 rounded-lg">
+            <CatLogo width={36} height={36} />
           </div>
-          <h1 className="font-bold text-xl text-white">Catz<span className="text-secondary">3</span></h1>
+          <h1 className="font-bold text-xl font-[Orbitron]">CATZ<span className="text-primary">3</span></h1>
         </div>
         
         {/* Nav Links */}
@@ -41,15 +42,17 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
             <Link 
               key={item.path} 
               href={item.path}
+              className={`flex items-center px-4 py-3 rounded-lg mb-1 transition-colors duration-200 
+              ${location === item.path 
+                ? "text-primary bg-primary/10 font-medium" 
+                : "text-muted-foreground hover:bg-muted"
+              }`}
             >
-              <a 
-                className={`flex items-center px-4 py-3 rounded-lg mb-1 hover:bg-muted ${
-                  location === item.path ? "text-white bg-muted" : "text-muted-foreground"
-                }`}
-              >
-                <i className={`fas ${item.icon} w-6`}></i>
-                <span className="ml-3">{item.label}</span>
-              </a>
+              <i className={`fas ${item.icon} w-6`}></i>
+              <span className="ml-3 font-[Space_Grotesk]">{item.label}</span>
+              {location === item.path && (
+                <div className="ml-auto w-1.5 h-8 bg-primary rounded-full"></div>
+              )}
             </Link>
           ))}
         </nav>
@@ -57,18 +60,21 @@ export default function Sidebar({ isVisible = true }: SidebarProps) {
         {/* User Info */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary">
               <i className="fas fa-user"></i>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-white font-medium">
+              <p className="text-sm font-medium">
                 {currentUser?.displayName || "Crypto Kitten"}
               </p>
               <p className="text-xs text-muted-foreground">
-                {currentUser?.isConnected ? "Connected" : "Disconnected"}
+                {currentUser?.isConnected 
+                  ? <span className="flex items-center"><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>Connected</span> 
+                  : <span className="flex items-center"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span>Disconnected</span>
+                }
               </p>
             </div>
-            <button className="ml-auto text-muted-foreground hover:text-white">
+            <button className="ml-auto text-muted-foreground hover:text-foreground">
               <i className="fas fa-cog"></i>
             </button>
           </div>
