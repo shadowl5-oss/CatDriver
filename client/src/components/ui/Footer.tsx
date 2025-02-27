@@ -9,12 +9,12 @@ export default function Footer() {
             <CatLogo width={24} height={24} />
           </div>
           <div>
-            © 2023-2025 Cat Driven by CatsDAO. All Rights Reserved
+            © 2023-2025 Cat Driven by CatDAO. All Rights Reserved
           </div>
         </div>
         <div className="flex items-center">
           <div className="text-xs text-muted-foreground mr-4 font-semibold">
-            BUILT WITH <span className="text-primary font-bold">♥</span> BY CATSDAO
+            BUILT WITH <span className="text-primary font-bold">♥</span> BY CATDAO
           </div>
           <div className="flex space-x-6">
             <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
