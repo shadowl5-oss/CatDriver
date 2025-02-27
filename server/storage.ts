@@ -246,7 +246,11 @@ export class MemStorage implements IStorage {
   
   async getAllLostPets(): Promise<LostPet[]> {
     return Array.from(this.lostPets.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
   }
   
   async getLostPetsByUserId(userId: number): Promise<LostPet[]> {
@@ -295,7 +299,11 @@ export class MemStorage implements IStorage {
   async getLostPetSightingsByLostPetId(lostPetId: number): Promise<LostPetSighting[]> {
     return Array.from(this.lostPetSightings.values())
       .filter(sighting => sighting.lostPetId === lostPetId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
   }
   
   async createLostPetSighting(insertSighting: InsertLostPetSighting): Promise<LostPetSighting> {
@@ -952,5 +960,22 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Create and export the storage instance
-// Use DatabaseStorage if DATABASE_URL is available
-export const storage = new DatabaseStorage();
+// Using DatabaseStorage for persistent storage with PostgreSQL
+const storage = new DatabaseStorage();
+
+// Initialize mock data on startup if needed
+if (process.env.DATABASE_URL) {
+  console.log("Using PostgreSQL database storage");
+  (async () => {
+    try {
+      await storage.initializeMockData();
+      console.log("Database initialized with mock data (if empty)");
+    } catch (error) {
+      console.error("Error initializing database:", error);
+    }
+  })();
+} else {
+  console.warn("DATABASE_URL not found, using in-memory storage");
+}
+
+export { storage };
