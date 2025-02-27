@@ -26,161 +26,163 @@ type ASCIIOptions = {
  * Generate a complete ASCII art representation of a cat with specified traits
  */
 export function generateCatASCII(traits: Partial<CatTrait> = {}, options: Partial<ASCIIOptions> = {}): string {
-  // Default options
+  // Default options if not provided
   const finalOptions: ASCIIOptions = {
-    width: 40,
-    colorMode: 'none',
-    detailLevel: 'medium',
-    frameStyle: 'quantum',
-    ...options
+    width: options.width || 50,
+    colorMode: options.colorMode || 'none',
+    detailLevel: options.detailLevel || 'medium',
+    frameStyle: options.frameStyle || 'simple'
   };
-
-  // Default traits
-  const finalTraits: CatTrait = {
-    rarity: 'common',
-    pattern: 'solid',
-    eyeStyle: 'normal',
-    whiskerStyle: 'standard',
-    special: false,
-    expression: 'neutral',
-    accessories: [],
-    ...traits
-  };
-
-  // Build the ASCII art cat
-  let result = '';
-
-  // Add frame top if requested
-  if (finalOptions.frameStyle) {
-    result += generateFrame('top', finalOptions.frameStyle, finalOptions.width);
-  }
-
-  // Generate the main cat components
-  const head = generateHead(finalTraits, finalOptions);
-  const body = generateBody(finalTraits, finalOptions);
-  const accessories = generateAccessories(finalTraits, finalOptions);
-
-  // Combine all components
-  result += head + body + accessories;
-
-  // Add traits info
-  result += generateTraitsInfo(finalTraits, finalOptions);
   
-  // Add frame bottom if requested
-  if (finalOptions.frameStyle) {
-    result += generateFrame('bottom', finalOptions.frameStyle, finalOptions.width);
+  // Default traits if not provided
+  const finalTraits: CatTrait = {
+    rarity: traits.rarity || 'Common',
+    pattern: traits.pattern || 'none',
+    eyeStyle: traits.eyeStyle || 'normal',
+    whiskerStyle: traits.whiskerStyle || 'short',
+    special: traits.special || false,
+    expression: traits.expression || 'neutral',
+    accessories: traits.accessories || []
+  };
+  
+  // Generate the ASCII art
+  let asciiArt = '';
+  
+  // Add top frame
+  asciiArt += generateFrame('top', finalOptions.frameStyle, finalOptions.width) + '\n';
+  
+  // Add cat head
+  asciiArt += generateHead(finalTraits, finalOptions) + '\n';
+  
+  // Add cat body
+  asciiArt += generateBody(finalTraits, finalOptions) + '\n';
+  
+  // Add accessories if any
+  if (finalTraits.accessories.length > 0) {
+    asciiArt += generateAccessories(finalTraits, finalOptions) + '\n';
   }
-
-  return result;
+  
+  // Add traits info
+  asciiArt += generateTraitsInfo(finalTraits, finalOptions) + '\n';
+  
+  // Add bottom frame
+  asciiArt += generateFrame('bottom', finalOptions.frameStyle, finalOptions.width);
+  
+  return asciiArt;
 }
 
 /**
  * Generate ASCII frame around the cat
  */
 function generateFrame(position: 'top' | 'bottom', style: string, width: number): string {
+  let frame = '';
+  
   switch (style) {
+    case 'double':
+      frame = position === 'top' ? '╔' + '═'.repeat(width - 2) + '╗' : '╚' + '═'.repeat(width - 2) + '╝';
+      break;
+    case 'rounded':
+      frame = position === 'top' ? '╭' + '─'.repeat(width - 2) + '╮' : '╰' + '─'.repeat(width - 2) + '╯';
+      break;
     case 'quantum':
+      // A special frame with quantum-inspired characters
       if (position === 'top') {
-        let frame = '╭' + '─'.repeat(width - 2) + '╮\n';
-        frame += '│' + ' '.repeat(width - 2) + '│\n';
-        frame += '│' + centerText('QUANTUM CAT ORDINAL', width - 2) + '│\n';
-        frame += '│' + ' '.repeat(width - 2) + '│\n';
-        return frame;
+        frame = '┌' + '─'.repeat(Math.floor((width - 12) / 2)) + ' QUANTUM CAT ' + '─'.repeat(Math.ceil((width - 12) / 2)) + '┐';
       } else {
-        let frame = '│' + ' '.repeat(width - 2) + '│\n';
-        frame += '╰' + '─'.repeat(width - 2) + '╯\n';
-        return frame;
+        frame = '└' + '─'.repeat(Math.floor((width - 20) / 2)) + ' SCHRÖDINGER\'S BOX ' + '─'.repeat(Math.ceil((width - 20) / 2)) + '┘';
       }
-    case 'blockchain':
+      break;
+    case 'bitcoin':
+      // A Bitcoin-themed frame
       if (position === 'top') {
-        let frame = '┌' + '━'.repeat(width - 2) + '┐\n';
-        frame += '┃' + ' '.repeat(width - 2) + '┃\n';
-        frame += '┃' + centerText('BITCOIN BLOCK #831045', width - 2) + '┃\n';
-        frame += '┃' + ' '.repeat(width - 2) + '┃\n';
-        return frame;
+        frame = '┌' + '─'.repeat(Math.floor((width - 8) / 2)) + ' ₿ITCAT ' + '─'.repeat(Math.ceil((width - 8) / 2)) + '┐';
       } else {
-        let frame = '┃' + ' '.repeat(width - 2) + '┃\n';
-        frame += '└' + '━'.repeat(width - 2) + '┘\n';
-        return frame;
+        frame = '└' + '─'.repeat(Math.floor((width - 16) / 2)) + ' BLOCK #' + Math.floor(Math.random() * 1000000) + ' ' + '─'.repeat(Math.ceil((width - 16) / 2)) + '┘';
       }
+      break;
     case 'simple':
-      if (position === 'top') {
-        return '+' + '-'.repeat(width - 2) + '+\n';
-      } else {
-        return '+' + '-'.repeat(width - 2) + '+\n';
-      }
     default:
-      return '';
+      frame = position === 'top' ? '+' + '-'.repeat(width - 2) + '+' : '+' + '-'.repeat(width - 2) + '+';
+      break;
   }
+  
+  return frame;
 }
 
 /**
  * Generate ASCII art for cat head based on traits
  */
 function generateHead(traits: CatTrait, options: ASCIIOptions): string {
+  const { width, detailLevel } = options;
   const { eyeStyle, expression, rarity } = traits;
-  const { width } = options;
+  
   let head = '';
-
+  let ears = '';
+  let face = '';
+  let mouth = '';
+  
   // Generate ears based on rarity
-  switch (rarity.toLowerCase()) {
-    case 'legendary':
-      head += centerLine('  /\\___/\\  ', width) + '\n';
-      head += centerLine(' /   ∆   \\ ', width) + '\n';
+  switch (rarity) {
+    case 'Legendary':
+      ears = '   /\\     /\\   ';
       break;
-    case 'epic':
-      head += centerLine('  /\\   /\\  ', width) + '\n';
-      head += centerLine(' /  \\_/  \\ ', width) + '\n';
+    case 'Epic':
+      ears = '   /\\\\   //\\   ';
       break;
-    case 'rare':
-      head += centerLine('  /\\___/\\  ', width) + '\n';
-      head += centerLine(' /  o o  \\ ', width) + '\n';
+    case 'Rare':
+      ears = '   /\\     /\\   ';
       break;
-    default: // common
-      head += centerLine('  /\\___/\\  ', width) + '\n';
-      head += centerLine(' /       \\ ', width) + '\n';
+    case 'Common':
+    default:
+      ears = '   /\\     /\\   ';
+      break;
   }
-
-  // Generate eyes based on eye style
+  
+  // Generate eyes based on eyeStyle
   let eyes = '';
   switch (eyeStyle) {
-    case 'wide':
-      eyes = ' O     O ';
-      break;
-    case 'squint':
-      eyes = ' -     - ';
-      break;
-    case 'wink':
-      eyes = ' O     - ';
-      break;
     case 'quantum':
-      eyes = ' @     @ ';
+      eyes = '  ⊛   ⊛  ';
       break;
+    case 'binary':
+      eyes = '  1   0  ';
+      break;
+    case 'normal':
     default:
-      eyes = ' *     * ';
+      eyes = '  •   •  ';
+      break;
   }
-  head += centerLine(eyes, width) + '\n';
-
-  // Generate expression
-  let expressionLine = '';
+  
+  // Generate face
+  face = ' /       \\ ';
+  
+  // Generate mouth based on expression
   switch (expression) {
     case 'happy':
-      expressionLine = '   \\_^_^_/   ';
+      mouth = ' \\  ‿  / ';
       break;
     case 'sad':
-      expressionLine = '   \\_v_v_/   ';
+      mouth = ' \\  ⌒  / ';
       break;
     case 'surprised':
-      expressionLine = '   \\_o_o_/   ';
+      mouth = ' \\  O  / ';
       break;
-    case 'angry':
-      expressionLine = '   \\_>_<_/   ';
+    case 'wise':
+      mouth = ' \\  ω  / ';
       break;
+    case 'neutral':
     default:
-      expressionLine = '   \\_u_u_/   ';
+      mouth = ' \\  _  / ';
+      break;
   }
-  head += centerLine(expressionLine, width) + '\n';
-
+  
+  // Combine parts to form head
+  head = centerLine(ears, width) + '\n' + 
+         centerLine(face, width) + '\n' + 
+         centerLine(eyes, width) + '\n' + 
+         centerLine(' |  ^  | ', width) + '\n' + 
+         centerLine(mouth, width);
+  
   return head;
 }
 
@@ -188,66 +190,57 @@ function generateHead(traits: CatTrait, options: ASCIIOptions): string {
  * Generate ASCII art for cat body based on traits
  */
 function generateBody(traits: CatTrait, options: ASCIIOptions): string {
-  const { pattern, special } = traits;
   const { width, detailLevel } = options;
+  const { pattern, rarity, special } = traits;
+  
   let body = '';
-
-  // Different body patterns
+  let patternChars = '';
+  
+  // Body shape
+  const topBody = '  \\_____/  ';
+  
+  // Generate pattern characters based on pattern type
   switch (pattern) {
     case 'striped':
-      body += centerLine('  /       \\  ', width) + '\n';
-      body += centerLine(' /  =====  \\ ', width) + '\n';
-      body += centerLine('/  =======  \\', width) + '\n';
-      if (detailLevel !== 'low') {
-        body += centerLine('|  =======  |', width) + '\n';
-        body += centerLine('\\  =====  / ', width) + '\n';
-      }
+      patternChars = '~~~~~~~~~';
       break;
     case 'spotted':
-      body += centerLine('  /       \\  ', width) + '\n';
-      body += centerLine(' /  o o o  \\ ', width) + '\n';
-      body += centerLine('/  o o o o  \\', width) + '\n';
-      if (detailLevel !== 'low') {
-        body += centerLine('|  o o o o  |', width) + '\n';
-        body += centerLine('\\  o o o  / ', width) + '\n';
-      }
+      patternChars = '* * * * *';
       break;
-    case 'binary':
-      if (special) {
-        body += centerLine('  /       \\  ', width) + '\n';
-        body += centerLine(' / 10110011 \\ ', width) + '\n';
-        body += centerLine('/ 01001010  \\', width) + '\n';
-        if (detailLevel !== 'low') {
-          body += centerLine('| 11001101  |', width) + '\n';
-          body += centerLine('\\ 01010101 / ', width) + '\n';
-        }
-      } else {
-        body += centerLine('  /       \\  ', width) + '\n';
-        body += centerLine(' /         \\ ', width) + '\n';
-        body += centerLine('/           \\', width) + '\n';
-        if (detailLevel !== 'low') {
-          body += centerLine('|           |', width) + '\n';
-          body += centerLine('\\         / ', width) + '\n';
-        }
-      }
+    case 'tabby':
+      patternChars = '≈≈≈≈≈≈≈≈≈';
       break;
-    default: // solid
-      body += centerLine('  /       \\  ', width) + '\n';
-      body += centerLine(' /         \\ ', width) + '\n';
-      body += centerLine('/           \\', width) + '\n';
-      if (detailLevel !== 'low') {
-        body += centerLine('|           |', width) + '\n';
-        body += centerLine('\\         / ', width) + '\n';
-      }
+    case 'quantum':
+      patternChars = '⌁⌁⌁⌁⌁⌁⌁⌁⌁';
+      break;
+    case 'none':
+    default:
+      patternChars = '         ';
+      break;
   }
-
-  // Add tail
+  
+  // Add special traits for rare and legendary cats
+  if (special) {
+    patternChars = '★' + patternChars.substring(1, patternChars.length - 1) + '★';
+  }
+  
+  // Higher detail levels add more body parts
   if (detailLevel === 'high') {
-    body += centerLine('  -------() ', width) + '\n';
+    body = centerLine(topBody, width) + '\n' + 
+           centerLine(' |' + patternChars + '| ', width) + '\n' + 
+           centerLine(' | ^ ^ ^ | ', width) + '\n' + 
+           centerLine(' \\_|_|_|_/ ', width) + '\n' + 
+           centerLine('   | | |   ', width);
+  } else if (detailLevel === 'medium') {
+    body = centerLine(topBody, width) + '\n' + 
+           centerLine(' |' + patternChars + '| ', width) + '\n' + 
+           centerLine(' \\_______/ ', width);
   } else {
-    body += centerLine('  -------~ ', width) + '\n';
+    body = centerLine(topBody, width) + '\n' + 
+           centerLine(' |       | ', width) + '\n' + 
+           centerLine(' \\_____/ ', width);
   }
-
+  
   return body;
 }
 
@@ -255,30 +248,25 @@ function generateBody(traits: CatTrait, options: ASCIIOptions): string {
  * Generate ASCII art for cat accessories based on traits
  */
 function generateAccessories(traits: CatTrait, options: ASCIIOptions): string {
-  const { accessories, special } = traits;
   const { width } = options;
-  let result = '';
-
-  // Add accessories
+  const { accessories } = traits;
+  
+  let accessoryArt = '';
+  
   if (accessories.includes('hat')) {
-    result += centerLine('    _===_    ', width) + '\n';
+    accessoryArt += centerLine('   _____   ', width) + '\n' + 
+                   centerLine('  /     \\  ', width) + '\n';
   }
   
   if (accessories.includes('bowtie')) {
-    result += centerLine('    >X<    ', width) + '\n';
+    accessoryArt += centerLine('  \\/\\_/\\/  ', width) + '\n';
   }
   
   if (accessories.includes('glasses')) {
-    // Replace the eyes line with glasses
-    result += centerLine(' B=====B ', width) + '\n';
+    accessoryArt += centerLine('  ⊙---⊙  ', width) + '\n';
   }
-
-  // Add special quantum effects for special cats
-  if (special) {
-    result += centerLine('  ~*~*~*~  ', width) + '\n';
-  }
-
-  return result;
+  
+  return accessoryArt;
 }
 
 /**
@@ -286,35 +274,31 @@ function generateAccessories(traits: CatTrait, options: ASCIIOptions): string {
  */
 function generateTraitsInfo(traits: CatTrait, options: ASCIIOptions): string {
   const { width } = options;
-  let result = '\n';
+  const { rarity, pattern, special } = traits;
   
-  result += centerLine('=== TRAITS ===', width) + '\n';
-  result += centerLine(`Rarity: ${capitalize(traits.rarity)}`, width) + '\n';
-  result += centerLine(`Pattern: ${capitalize(traits.pattern)}`, width) + '\n';
+  const rarityInfo = `Rarity: ${rarity}`;
+  const patternInfo = `Pattern: ${capitalize(pattern)}`;
+  const specialInfo = special ? 'Special: Yes' : '';
   
-  if (traits.special) {
-    result += centerLine('✧ Quantum Infused ✧', width) + '\n';
-  }
+  const info = centerText(`${rarityInfo} | ${patternInfo}${special ? ' | ' + specialInfo : ''}`, width);
   
-  return result;
+  return info;
 }
 
 /**
  * Utility to center text in a given width
  */
 function centerText(text: string, width: number): string {
-  const padding = Math.max(0, width - text.length);
-  const leftPadding = Math.floor(padding / 2);
-  return ' '.repeat(leftPadding) + text + ' '.repeat(padding - leftPadding);
+  const padding = Math.max(0, Math.floor((width - text.length) / 2));
+  return ' '.repeat(padding) + text + ' '.repeat(width - text.length - padding);
 }
 
 /**
  * Utility to center a line in the ASCII art
  */
 function centerLine(line: string, width: number): string {
-  const padding = Math.max(0, width - line.length);
-  const leftPadding = Math.floor(padding / 2);
-  return ' '.repeat(leftPadding) + line + ' '.repeat(padding - leftPadding);
+  const padding = Math.max(0, Math.floor((width - line.length) / 2));
+  return ' '.repeat(padding) + line + ' '.repeat(width - line.length - padding);
 }
 
 /**
@@ -328,98 +312,92 @@ function capitalize(str: string): string {
  * Generate more complex and advanced ASCII cats for high-tier ordinals
  */
 export function generateAdvancedCatASCII(
-  rarity: string, 
-  blockHeight: number, 
-  quantumState: string
+  traits: Partial<CatTrait> = {},
+  options: Partial<ASCIIOptions> = {}
 ): string {
-  let catArt = '';
+  const width = options.width || 60;
+  const detailLevel = options.detailLevel || 'medium';
+  const colorMode = options.colorMode || 'none';
   
-  // Determine size and complexity based on rarity
-  const isLegendary = rarity === 'Legendary';
-  const isEpic = rarity === 'Epic';
-  const isRare = rarity === 'Rare';
-  const entropyFactor = blockHeight % 100 / 100;
+  // Generate a more complex and detailed ASCII art
+  let art = '';
   
-  // For legendary cats, use more complex ASCII art
-  if (isLegendary) {
-    catArt = `
-          /\\_/\\  ${blockHeight} 
-   ______/ o o \\______
- /\\   (  =^=^=  )    /\\
-/  \\   (   v   )    /  \\
-|    \\  (     )   /    |
-|      \\(     )/       |
-\\       (     )        /
- \\     (       )      /
-  \\___/_________\\____/
-      █ ${quantumState} █
-${generateCodePattern(blockHeight)}
-    `;
-  } 
-  // For epic cats
-  else if (isEpic) {
-    catArt = `
-     /\\     /\\
-    /  \\___/  \\
-   /  ${eyeSymbol(entropyFactor)}   ${eyeSymbol(entropyFactor)}  \\
-  /     >.<     \\
- /               \\
-(   ${blockHeight}   )
-(                 )
-(  ${patternLine(entropyFactor)}  )
- (      v      )
-  \\_${quantumState}_/
-    `;
-  }
-  // For rare cats 
-  else if (isRare) {
-    catArt = `
-    /\\___/\\
-   /   o   \\
-  /  ${eyeSymbol(entropyFactor)}   ${eyeSymbol(entropyFactor)}  \\
- (     w     )
- (  ${patternLine(entropyFactor)}  )
-  \\ ${blockHeight} /
-   ------
-    `;
-  }
-  // For common cats
-  else {
-    catArt = `
-   /\\___/\\
-  /  o o  \\
- (   >.<   )
- (  ${blockHeight}  )
-  ------
-   `;
+  // Create a frame with quantum-themed characters
+  art += generateFrame('top', 'quantum', width) + '\n';
+  
+  // Add Bitcoin block-inspired binary data at the top
+  if (traits.special) {
+    art += ' ' + generateCodePattern(Math.floor(Math.random() * 1000000)) + '\n';
   }
   
-  return catArt;
+  // Create a more detailed cat drawing
+  const headHeight = detailLevel === 'high' ? 6 : (detailLevel === 'medium' ? 5 : 4);
+  for (let i = 0; i < headHeight; i++) {
+    let line = '';
+    const entropy = Math.random();
+    
+    // Add more complex patterns based on rarity
+    if (traits.rarity === 'Legendary') {
+      line = ' ' + '✧'.repeat(5) + eyeSymbol(entropy + i) + '✧'.repeat(5) + ' ';
+    } else if (traits.rarity === 'Epic') {
+      line = ' ' + '✦'.repeat(4) + eyeSymbol(entropy + i) + '✦'.repeat(4) + ' ';
+    } else if (traits.rarity === 'Rare') {
+      line = ' ' + '✺'.repeat(3) + eyeSymbol(entropy + i) + '✺'.repeat(3) + ' ';
+    } else {
+      line = ' ' + '✹'.repeat(2) + eyeSymbol(entropy + i) + '✹'.repeat(2) + ' ';
+    }
+    
+    art += centerLine(line, width) + '\n';
+  }
+  
+  // Add a pattern line with the cat's pattern
+  art += centerLine(patternLine(Math.random()), width) + '\n';
+  
+  // Add paws
+  const pawLine = '   ⟨⦿⦿⦿⟩   ⟨⦿⦿⦿⟩   ';
+  art += centerLine(pawLine, width) + '\n';
+  
+  // Add quantum state info
+  const quantumState = Math.random() > 0.5 ? 'Observed' : 'Superposition';
+  art += centerLine(`Quantum State: ${quantumState}`, width) + '\n';
+  
+  // Add detailed traits info
+  art += centerLine(`Rarity: ${traits.rarity || 'Common'} | Pattern: ${capitalize(traits.pattern || 'none')}`, width) + '\n';
+  
+  // Add accessories info if present
+  if (traits.accessories && traits.accessories.length > 0) {
+    art += centerLine(`Accessories: ${traits.accessories.map(capitalize).join(', ')}`, width) + '\n';
+  }
+  
+  // Add bottom frame
+  art += generateFrame('bottom', 'quantum', width);
+  
+  return art;
 }
 
 /**
  * Generate a binary/hex pattern based on the block height
  */
 function generateCodePattern(blockHeight: number): string {
-  // Convert block height to binary and take last 32 characters
-  const binary = blockHeight.toString(2).padStart(32, '0');
-  const lines = [];
+  const blockHex = blockHeight.toString(16).padStart(8, '0');
+  const pattern = [];
   
-  // Format into 4 lines of 8 characters
-  for (let i = 0; i < 4; i++) {
-    const start = i * 8;
-    lines.push('    ' + binary.slice(start, start + 8));
+  for (let i = 0; i < 8; i++) {
+    // Convert each hex digit to a 4-character binary representation
+    const hexDigit = blockHex[i];
+    const binary = parseInt(hexDigit, 16).toString(2).padStart(4, '0');
+    pattern.push(binary);
   }
   
-  return lines.join('\n');
+  return pattern.join(' ');
 }
 
 /**
  * Generate eye symbol based on entropy
  */
 function eyeSymbol(entropy: number): string {
-  const symbols = ['o', '*', '@', '0', 'O', '^', '•', '⊙', '☉'];
-  const index = Math.floor(entropy * symbols.length);
+  const symbols = ['⫘', '⫛', '⫠', '⫯', '⧗', '◉', '◎', '○', '◌', '⨁'];
+  const index = Math.floor(entropy * symbols.length) % symbols.length;
   return symbols[index];
 }
 
@@ -428,17 +406,16 @@ function eyeSymbol(entropy: number): string {
  */
 function patternLine(entropy: number): string {
   const patterns = [
-    '-------',
-    '~~~~~~~',
-    '=======',
-    '^^^^^^^',
-    '*******',
-    '#######',
-    '·······',
-    ':::::::',
-    '|||||||'
+    '▁▂▃▄▅▆▇█▇▆▅▄▃▂▁',
+    '▂▃▁▃▂▄▂▇▂▄▂▃▁▃▂',
+    '▔▀▔▀▔▀▔▀▔▀▔▀▔▀▔',
+    '▒░▒░▒░▒░▒░▒░▒░▒░',
+    '═╬═╬═╬═╬═╬═╬═╬═╬',
+    '⍡⍢⍣⍤⍥⍦⍧⍨⍩⍪⍫⍬⍭⍮⍯',
+    '⌁⌁⌁⎍⌁⌁⌁⎍⌁⌁⌁⎍⌁⌁⌁'
   ];
-  const index = Math.floor(entropy * patterns.length);
+  
+  const index = Math.floor(entropy * patterns.length) % patterns.length;
   return patterns[index];
 }
 
@@ -446,10 +423,12 @@ function patternLine(entropy: number): string {
  * Specialized ASCII artists for different cat types
  */
 export function generateCatTypeASCII(
-  catType: string, 
-  traits: Record<string, any> = {}
+  traits: Record<string, any>,
+  options: Partial<ASCIIOptions> = {}
 ): string {
-  switch (catType.toLowerCase()) {
+  const type = traits.type || 'quantum';
+  
+  switch (type) {
     case 'quantum':
       return generateQuantumCatASCII(traits);
     case 'bitcoin':
@@ -459,7 +438,7 @@ export function generateCatTypeASCII(
     case 'schrodinger':
       return generateSchrodingerCatASCII(traits);
     default:
-      return generateCatASCII(traits);
+      return generateQuantumCatASCII(traits);
   }
 }
 
@@ -467,104 +446,135 @@ export function generateCatTypeASCII(
  * Generate ASCII art for quantum-state cats
  */
 function generateQuantumCatASCII(traits: Record<string, any>): string {
-  const state = traits.quantumState || 'superposition';
-  let ascii = '';
+  const width = traits.width || 60;
+  const art = `
+  ╭${'─'.repeat(width - 4)}╮
+  │${' '.repeat(Math.floor((width - 26) / 2))}QUANTUM SUPERPOSITION CAT${' '.repeat(Math.ceil((width - 26) / 2))}│
+  ├${'─'.repeat(width - 4)}┤
+  │${' '.repeat(Math.floor((width - 10) / 2))}⟨Ψ|Ψ⟩ = 1${' '.repeat(Math.ceil((width - 10) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  /⊛\\   /⊛\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}│ ⫯   ⦿   ⫯ │${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ⫘___⫘  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |⌁⌁⌁⌁⌁⌁⌁|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |⎍⌁⎍⌁⎍⌁⎍|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 49) / 2))}This cat exists in both alive and dead states simultaneously${' '.repeat(Math.ceil((width - 49) / 2))}│
+  │${' '.repeat(Math.floor((width - 36) / 2))}until the block hash is observed by miners${' '.repeat(Math.ceil((width - 36) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
+  │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  ╰${'─'.repeat(width - 4)}╯
+`.trimStart();
   
-  ascii += '  ╭───── QUANTUM CAT ─────╮\n';
-  ascii += '  │     ∿∿∿∿∿∿∿∿∿∿∿∿∿     │\n';
-  ascii += '  │      /\\_____/\\        │\n';
-  ascii += '  │     /  @   @  \\       │\n';
-  
-  if (state === 'superposition') {
-    ascii += '  │    |  ↑ ↓ ↑ ↓  |       │\n';
-    ascii += '  │    |  BOTH/NEITHER |   │\n';
-  } else if (state === 'entangled') {
-    ascii += '  │    |  ≈≈≈≈≈≈≈  |       │\n';
-    ascii += '  │    |   LINKED   |      │\n';
-  } else {
-    ascii += '  │    |   >---<   |       │\n';
-    ascii += '  │    |  OBSERVED  |      │\n';
-  }
-  
-  ascii += '  │     \\  \\_ψ_/  /        │\n';
-  ascii += '  │      \\       /         │\n';
-  ascii += `  │       STATE: ${state.toUpperCase()}│\n`;
-  ascii += '  ╰─────────────────────────╯\n';
-  
-  return ascii;
+  return art;
 }
 
 /**
  * Generate ASCII art for Bitcoin-themed cats
  */
 function generateBitcoinCatASCII(traits: Record<string, any>): string {
-  const blockHeight = traits.blockHeight || '831045';
+  const width = traits.width || 60;
+  const art = `
+  ╭${'─'.repeat(width - 4)}╮
+  │${' '.repeat(Math.floor((width - 19) / 2))}BITCOIN ORDINAL CAT${' '.repeat(Math.ceil((width - 19) / 2))}│
+  ├${'─'.repeat(width - 4)}┤
+  │${' '.repeat(Math.floor((width - 8) / 2))}₿ ₿ ₿ ₿${' '.repeat(Math.ceil((width - 8) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  /₿\\   /₿\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}│ ⊙   ⊙   ⊙ │${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ₿___₿  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |₿₿₿₿₿₿₿|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |₿₿₿₿₿₿₿|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 47) / 2))}HODL this rare cat and watch your portfolio moon!${' '.repeat(Math.ceil((width - 47) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
+  │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  │${' '.repeat(Math.floor((width - 22) / 2))}Token ID: ${traits.tokenId || '0x1234'}${' '.repeat(Math.ceil((width - 22) / 2))}│
+  ╰${'─'.repeat(width - 4)}╯
+`.trimStart();
   
-  let ascii = '';
-  ascii += '  ╭───── BITCOIN CAT ─────╮\n';
-  ascii += '  │        ₿₿₿₿₿          │\n';
-  ascii += '  │      /\\_____/\\        │\n';
-  ascii += '  │     /  ₿   ₿  \\       │\n';
-  ascii += '  │    |    ===    |       │\n';
-  ascii += '  │    |   HODL!   |       │\n';
-  ascii += '  │     \\  \\_^_/  /        │\n';
-  ascii += '  │      \\       /         │\n';
-  ascii += `  │      BLOCK: ${blockHeight}    │\n`;
-  ascii += '  ╰─────────────────────────╯\n';
-  
-  return ascii;
+  return art;
 }
 
 /**
  * Generate ASCII art for cypherpunk-themed cats
  */
 function generateCypherpunkCatASCII(traits: Record<string, any>): string {
-  const isAnonymous = traits.anonymous || true;
+  const width = traits.width || 60;
+  const art = `
+  ╭${'─'.repeat(width - 4)}╮
+  │${' '.repeat(Math.floor((width - 16) / 2))}CYPHERPUNK CAT${' '.repeat(Math.ceil((width - 16) / 2))}│
+  ├${'─'.repeat(width - 4)}┤
+  │${' '.repeat(Math.floor((width - 32) / 2))}0x${Math.random().toString(16).substr(2, 24)}${' '.repeat(Math.ceil((width - 32) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  /▓▓\\   /▓▓\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}│ §   §   § │${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ▓█_█▓  / ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |░▒▓█▓▒░|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |▓▒░░▒▓░|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 43) / 2))}Privacy is necessary for an open society${' '.repeat(Math.ceil((width - 43) / 2))}│
+  │${' '.repeat(Math.floor((width - 34) / 2))}in the electronic age. - 94${' '.repeat(Math.ceil((width - 34) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
+  │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  ╰${'─'.repeat(width - 4)}╯
+`.trimStart();
   
-  let ascii = '';
-  ascii += '  ╭──── CYPHERPUNK CAT ────╮\n';
-  ascii += '  │       #######          │\n';
-  ascii += '  │      /\\_____/\\        │\n';
-  ascii += '  │     /  •   •  \\       │\n';
-  ascii += '  │    |  ┏━━━━━┓  |       │\n';
-  ascii += '  │    |    ▲    |         │\n';
-  ascii += '  │     \\  \\_✓_/  /        │\n';
-  ascii += '  │      \\       /         │\n';
-  ascii += `  │   ${isAnonymous ? 'ANONYMOUS' : 'IDENTIFIED'}      │\n`;
-  ascii += '  ╰─────────────────────────╯\n';
-  
-  return ascii;
+  return art;
 }
 
 /**
  * Generate ASCII art for Schrodinger's cat
  */
 function generateSchrodingerCatASCII(traits: Record<string, any>): string {
-  const isObserved = traits.isObserved || false;
+  const width = traits.width || 60;
+  const isAlive = Math.random() > 0.5;
+  const state = isAlive ? 'ALIVE' : 'DEAD';
   
-  let ascii = '';
-  ascii += '  ╭─── SCHRÖDINGER\'S CAT ───╮\n';
-  ascii += '  │    ┌───────────┐       │\n';
+  const art = `
+  ╭${'─'.repeat(width - 4)}╮
+  │${' '.repeat(Math.floor((width - 18) / 2))}SCHRÖDINGER'S CAT${' '.repeat(Math.ceil((width - 18) / 2))}│
+  ├${'─'.repeat(width - 4)}┤
+  │${' '.repeat(Math.floor((width - 10) / 2))}STATE: ${state}${' '.repeat(Math.ceil((width - 10) / 2))}│
+  │${' '.repeat(width - 4)}│
+${isAlive ? `
+  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  /◉\\   /◉\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}│ •   •   • │${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} \\  ω___ω  / ${' '.repeat(Math.ceil((width - 15) / 2))}│` : `
+  │${' '.repeat(Math.floor((width - 15) / 2))}   /\\     /\\   ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  /xx\\   /xx\\  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} /    \\ /    \\ ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}│ x   x   x │${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))} \\  _____  / ${' '.repeat(Math.ceil((width - 15) / 2))}│`}
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |_______|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  |_______|  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(Math.floor((width - 15) / 2))}  \\_______/  ${' '.repeat(Math.ceil((width - 15) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 53) / 2))}When you observe the cat, its wave function collapses${' '.repeat(Math.ceil((width - 53) / 2))}│
+  │${' '.repeat(Math.floor((width - 49) / 2))}and it exists in one definite state: alive or dead${' '.repeat(Math.ceil((width - 49) / 2))}│
+  │${' '.repeat(width - 4)}│
+  │${' '.repeat(Math.floor((width - 21) / 2))}Block: ${traits.blockHeight || '831045'}${' '.repeat(Math.ceil((width - 21) / 2))}│
+  │${' '.repeat(Math.floor((width - 20) / 2))}Rarity: ${traits.rarity || 'Common'}${' '.repeat(Math.ceil((width - 20) / 2))}│
+  ╰${'─'.repeat(width - 4)}╯
+`.trimStart();
   
-  if (isObserved) {
-    ascii += '  │    │  /\\_____/\\  │       │\n';
-    ascii += '  │    │ /  ^   ^  \\ │       │\n';
-    ascii += '  │    │|    >.<    |│       │\n';
-    ascii += '  │    │ \\  \\_^_/  / │       │\n';
-    ascii += '  │    │  \\       /  │       │\n';
-    ascii += '  │    │   ALIVE!    │       │\n';
-  } else {
-    ascii += '  │    │             │       │\n';
-    ascii += '  │    │   ?????     │       │\n';
-    ascii += '  │    │             │       │\n';
-    ascii += '  │    │  UNKNOWN    │       │\n';
-    ascii += '  │    │             │       │\n';
-    ascii += '  │    │             │       │\n';
-  }
-  
-  ascii += '  │    └───────────┘       │\n';
-  ascii += `  │    STATUS: ${isObserved ? 'OBSERVED' : 'SUPERPOSITION'}│\n`;
-  ascii += '  ╰─────────────────────────╯\n';
-  
-  return ascii;
+  return art;
 }

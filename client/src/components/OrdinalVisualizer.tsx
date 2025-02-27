@@ -67,6 +67,7 @@ export default function OrdinalVisualizer({
   const [showAsciiVisualizer, setShowAsciiVisualizer] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  
   // Use the provided blockHeight if available, otherwise use default
   const [bitcoinData, setBitcoinData] = useState({
     block: blockHeight || 831045,
@@ -75,6 +76,7 @@ export default function OrdinalVisualizer({
     price: 61742,
     volatility: 0.67,
   });
+  
   const [quantum, setQuantum] = useState({
     superposition: Math.random(),
     entanglement: Math.random(),
@@ -84,6 +86,7 @@ export default function OrdinalVisualizer({
       phase: 0
     }
   });
+  
   // Use the provided rarity if available
   const [catTraits, setCatTraits] = useState({
     rarity: rarity || 'Unknown',
@@ -92,6 +95,20 @@ export default function OrdinalVisualizer({
     pattern: 'none',
     special: false,
   });
+  
+  // Function to start the visualization
+  const startVisualizer = () => {
+    setIsPlaying(true);
+    setStep(0);
+    setQuantumState('superposition');
+  };
+  
+  // Function to reset the visualization
+  const resetVisualizer = () => {
+    setIsPlaying(false);
+    setStep(0);
+    setQuantumState('superposition');
+  };
   
   // Set up animation loop
   useEffect(() => {
@@ -486,145 +503,79 @@ export default function OrdinalVisualizer({
     
     // Left whiskers
     ctx.beginPath();
-    ctx.moveTo(centerX - size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX - size * 0.7, centerY + size * 0.1);
+    ctx.moveTo(centerX - size * 0.2, centerY + size * 0.1);
+    ctx.lineTo(centerX - size * 0.6, centerY);
     ctx.stroke();
     
     ctx.beginPath();
     ctx.moveTo(centerX - size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX - size * 0.7, centerY + size * 0.2);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(centerX - size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX - size * 0.7, centerY + size * 0.3);
+    ctx.lineTo(centerX - size * 0.65, centerY + size * 0.2);
     ctx.stroke();
     
     // Right whiskers
     ctx.beginPath();
-    ctx.moveTo(centerX + size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX + size * 0.7, centerY + size * 0.1);
+    ctx.moveTo(centerX + size * 0.2, centerY + size * 0.1);
+    ctx.lineTo(centerX + size * 0.6, centerY);
     ctx.stroke();
     
     ctx.beginPath();
     ctx.moveTo(centerX + size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX + size * 0.7, centerY + size * 0.2);
+    ctx.lineTo(centerX + size * 0.65, centerY + size * 0.2);
     ctx.stroke();
     
-    ctx.beginPath();
-    ctx.moveTo(centerX + size * 0.2, centerY + size * 0.15);
-    ctx.lineTo(centerX + size * 0.7, centerY + size * 0.3);
-    ctx.stroke();
-    
-    // Mouth
-    ctx.beginPath();
-    ctx.arc(centerX, centerY + size * 0.25, size * 0.15, 0.1, Math.PI - 0.1);
-    ctx.stroke();
-    
-    // Add pattern if it's striped
+    // If it's a striped cat, add some stripes
     if (catTraits.pattern === 'striped') {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.lineWidth = 5;
+      ctx.strokeStyle = adjustColor(catTraits.color, 40);
+      ctx.lineWidth = 3;
       
-      for (let i = -5; i <= 5; i += 2) {
+      for (let i = -3; i <= 3; i += 2) {
         ctx.beginPath();
-        ctx.moveTo(centerX - size, centerY + i * size * 0.1);
-        ctx.lineTo(centerX + size, centerY + i * size * 0.1);
+        ctx.moveTo(centerX - size * 0.8, centerY + i * size * 0.1);
+        ctx.lineTo(centerX + size * 0.8, centerY + i * size * 0.1);
         ctx.stroke();
       }
     }
   };
   
-  // Draw binary patterns for special cats
+  // Draw binary pattern overlay for special cats
   const drawBinaryPattern = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.font = '16px monospace';
     
-    const binaryString = bitcoinData.block.toString(2) + bitcoinData.transactions.toString(2);
-    
-    for (let i = 0; i < binaryString.length; i++) {
-      const x = (i % 20) * (width / 20);
-      const y = Math.floor(i / 20) * 20 + 100;
-      
-      if (binaryString[i] === '1') {
-        ctx.fillRect(x, y, 10, 10);
+    for (let y = 0; y < height; y += 20) {
+      for (let x = 0; x < width; x += 20) {
+        const bit = Math.random() > 0.5 ? '1' : '0';
+        ctx.fillText(bit, x, y);
       }
     }
   };
   
-  // Helper function to adjust color brightness
-  const adjustColor = (color: string, amount: number) => {
-    // Hex to RGB
-    let r = parseInt(color.substring(1, 3), 16);
-    let g = parseInt(color.substring(3, 5), 16);
-    let b = parseInt(color.substring(5, 7), 16);
-    
-    // Adjust
-    r = Math.max(0, Math.min(255, r + amount));
-    g = Math.max(0, Math.min(255, g + amount));
-    b = Math.max(0, Math.min(255, b + amount));
-    
-    // RGB to Hex
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-  };
+  // Utility function to adjust a hex color by a brightness value
+  const adjustColor = (color: string, amount: number): string => {
+    let usePound = false;
   
-  // Start the visualization process
-  const startVisualizer = () => {
-    setIsPlaying(true);
-    setStep(0);
-    setQuantumState('superposition');
-    
-    // Reset the cat traits but preserve the rarity if provided as a prop
-    setCatTraits({
-      rarity: rarity || 'Unknown',
-      color: '#333',
-      eyeColor: '#00ff00',
-      pattern: 'none',
-      special: false,
-    });
-    
-    // Generate new random Bitcoin data
-    setBitcoinData({
-      block: 830000 + Math.floor(Math.random() * 2000),
-      transactions: 2500 + Math.floor(Math.random() * 2000),
-      fees: 0.5 + Math.random() * 3,
-      price: 60000 + Math.floor(Math.random() * 5000),
-      volatility: 0.3 + Math.random() * 0.7,
-    });
-    
-    // Reset quantum state
-    setQuantum({
-      superposition: Math.random(),
-      entanglement: Math.random(),
-      wave: {
-        amplitude: 30,
-        frequency: 0.02,
-        phase: 0
-      }
-    });
-  };
+    if (color[0] === "#") {
+      color = color.slice(1);
+      usePound = true;
+    }
   
-  // Reset the visualizer
-  const resetVisualizer = () => {
-    setIsPlaying(false);
-    setStep(0);
-    setQuantumState('superposition');
-    
-    // Also update the bitcoin data to use the provided blockHeight if available
-    if (blockHeight) {
-      setBitcoinData(prev => ({
-        ...prev,
-        block: blockHeight
-      }));
-    }
-    
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
+    const num = parseInt(color, 16);
+  
+    let r = (num >> 16) + amount;
+    r = Math.max(Math.min(255, r), 0);
+  
+    let g = ((num >> 8) & 0x00FF) + amount;
+    g = Math.max(Math.min(255, g), 0);
+  
+    let b = (num & 0x0000FF) + amount;
+    b = Math.max(Math.min(255, b), 0);
+  
+    return (usePound ? "#" : "") + (g | (r << 8) | (b << 16)).toString(16).padStart(6, '0');
   };
   
   // Get step description
-  const getStepDescription = () => {
-    switch (step) {
+  const getStepDescription = (): string => {
+    switch(step) {
       case 0:
         return "Extracting Bitcoin block data and price movements...";
       case 1:
@@ -635,6 +586,13 @@ export default function OrdinalVisualizer({
         return "Ordinal cat successfully generated!";
       default:
         return "";
+    }
+  };
+  
+  // Function to handle the ASCII tab click
+  const handleAsciiClick = () => {
+    if (step === 3) {
+      setShowAsciiVisualizer(true);
     }
   };
   
@@ -660,398 +618,416 @@ export default function OrdinalVisualizer({
       {/* Main Visualizer Component */}
       <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center' : ''}`}>
         <div className={`bg-black rounded-xl overflow-hidden ${isFullscreen ? 'w-[90vw] max-w-5xl' : 'w-full'}`}>
-        <div className="p-4 border-b border-white/10 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Atom className="h-5 w-5 text-purple-500" />
-            <h2 className="text-xl font-bold text-white">Quantum Cat Ordinal Visualizer</h2>
+          <div className="p-4 border-b border-white/10 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Atom className="h-5 w-5 text-purple-500" />
+              <h2 className="text-xl font-bold text-white">Quantum Cat Ordinal Visualizer</h2>
+            </div>
+            
+            {isFullscreen && (
+              <Button variant="ghost" className="text-white hover:bg-white/10" onClick={onClose}>
+                <span className="text-xl">×</span>
+              </Button>
+            )}
           </div>
           
-          {isFullscreen && (
-            <Button variant="ghost" className="text-white hover:bg-white/10" onClick={onClose}>
-              <span className="text-xl">×</span>
-            </Button>
-          )}
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-          <div className="md:col-span-2">
-            <div className="relative bg-black rounded-lg overflow-hidden">
-              <canvas 
-                ref={canvasRef} 
-                width={600} 
-                height={400} 
-                className="w-full h-auto bg-black"
-              />
-              
-              {!isPlaying && step === 0 && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-center p-6">
-                  <Atom className="h-16 w-16 text-purple-500 mb-4" />
-                  <h3 className="text-2xl font-bold mb-2">Quantum Ordinal Generator</h3>
-                  <p className="mb-6 max-w-md">
-                    Watch how we create our unique cat ordinals using Bitcoin blockchain data and 
-                    quantum mechanics principles inspired by Schrödinger's famous thought experiment.
-                  </p>
-                  <Button onClick={startVisualizer} className="bg-purple-600 hover:bg-purple-700 text-white">
-                    Start Visualization
-                  </Button>
-                </div>
-              )}
-              
-              {isPlaying && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-white font-medium">{getStepDescription()}</p>
-                      {step < 3 && (
-                        <Progress value={(step / 3) * 100} className="h-1 mt-2 bg-white/20" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            <div className="md:col-span-2">
+              <div className="relative bg-black rounded-lg overflow-hidden">
+                <canvas 
+                  ref={canvasRef} 
+                  width={600} 
+                  height={400} 
+                  className="w-full h-auto bg-black"
+                />
+                
+                {!isPlaying && step === 0 && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-center p-6">
+                    <Atom className="h-16 w-16 text-purple-500 mb-4" />
+                    <h3 className="text-2xl font-bold mb-2">Quantum Ordinal Generator</h3>
+                    <p className="mb-6 max-w-md">
+                      Watch how we create our unique cat ordinals using Bitcoin blockchain data and 
+                      quantum mechanics principles inspired by Schrödinger's famous thought experiment.
+                    </p>
+                    <Button onClick={startVisualizer} className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Start Visualization
+                    </Button>
+                  </div>
+                )}
+                
+                {isPlaying && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-white font-medium">{getStepDescription()}</p>
+                        {step < 3 && (
+                          <Progress value={(step / 3) * 100} className="h-1 mt-2 bg-white/20" />
+                        )}
+                      </div>
+                      
+                      {step === 3 && (
+                        <Button onClick={resetVisualizer} size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10">
+                          Reset
+                        </Button>
                       )}
                     </div>
-                    
-                    {step === 3 && (
-                      <Button onClick={resetVisualizer} size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10">
-                        Reset
-                      </Button>
-                    )}
                   </div>
+                )}
+              </div>
+              
+              {step === 3 && (
+                <div className="mt-4 bg-muted/10 rounded-lg p-4 text-white">
+                  <h3 className="font-bold mb-2">Generated Cat Ordinal</h3>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    <div>
+                      <span className="text-xs text-white/60">Rarity</span>
+                      <p className="font-medium">{catTraits.rarity}</p>
+                    </div>
+                    
+                    <div>
+                      <span className="text-xs text-white/60">Block Height</span>
+                      <p className="font-medium">{bitcoinData.block}</p>
+                    </div>
+                    
+                    <div>
+                      <span className="text-xs text-white/60">Special Features</span>
+                      <p className="font-medium">{catTraits.special ? 'Yes' : 'No'}</p>
+                    </div>
+                    
+                    <div>
+                      <span className="text-xs text-white/60">Pattern</span>
+                      <p className="font-medium">{catTraits.pattern.charAt(0).toUpperCase() + catTraits.pattern.slice(1)}</p>
+                    </div>
+                  </div>
+                  
+                  <Alert className="mt-4 bg-purple-950 border-purple-500 text-white">
+                    <Box className="h-4 w-4" />
+                    <AlertTitle>Schrödinger's Cat Principle Applied</AlertTitle>
+                    <AlertDescription>
+                      This ordinal existed in multiple potential states until it was "observed" 
+                      during the generation process, at which point its quantum wave function collapsed 
+                      into a single state with defined properties.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               )}
             </div>
             
-            {step === 3 && (
-              <div className="mt-4 bg-muted/10 rounded-lg p-4 text-white">
-                <h3 className="font-bold mb-2">Generated Cat Ordinal</h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <div>
-                    <span className="text-xs text-white/60">Rarity</span>
-                    <p className="font-medium">{catTraits.rarity}</p>
-                  </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Block Height</span>
-                    <p className="font-medium">{bitcoinData.block}</p>
-                  </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Special Features</span>
-                    <p className="font-medium">{catTraits.special ? 'Yes' : 'No'}</p>
-                  </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Pattern</span>
-                    <p className="font-medium">{catTraits.pattern.charAt(0).toUpperCase() + catTraits.pattern.slice(1)}</p>
-                  </div>
-                </div>
+            <div className="space-y-6">
+              <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                <TabsList className="grid grid-cols-4 w-full">
+                  <TabsTrigger value="quantum" className="text-white data-[state=active]:bg-purple-900">
+                    Quantum
+                  </TabsTrigger>
+                  <TabsTrigger value="bitcoin" className="text-white data-[state=active]:bg-amber-800">
+                    Bitcoin
+                  </TabsTrigger>
+                  <TabsTrigger value="process" className="text-white data-[state=active]:bg-blue-900">
+                    Process
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="ascii" 
+                    className="text-white data-[state=active]:bg-green-900"
+                    onClick={handleAsciiClick}
+                  >
+                    <Terminal className="h-4 w-4 mr-1 inline-block" />
+                    ASCII
+                  </TabsTrigger>
+                </TabsList>
                 
-                <Alert className="mt-4 bg-purple-950 border-purple-500 text-white">
-                  <Box className="h-4 w-4" />
-                  <AlertTitle>Schrödinger's Cat Principle Applied</AlertTitle>
-                  <AlertDescription>
-                    This ordinal existed in multiple potential states until it was "observed" 
-                    during the generation process, at which point its quantum wave function collapsed 
-                    into a single state with defined properties.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-          </div>
-          
-          <div className="space-y-6">
-            <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-              <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="quantum" className="text-white data-[state=active]:bg-purple-900">
-                  Quantum
-                </TabsTrigger>
-                <TabsTrigger value="bitcoin" className="text-white data-[state=active]:bg-amber-800">
-                  Bitcoin
-                </TabsTrigger>
-                <TabsTrigger value="process" className="text-white data-[state=active]:bg-blue-900">
-                  Process
-                </TabsTrigger>
-                <TabsTrigger value="ascii" className="text-white data-[state=active]:bg-green-900">
-                  <Terminal className="h-4 w-4 mr-1 inline-block" />
-                  ASCII
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="quantum" className="p-4 bg-purple-950/50 rounded-lg border border-purple-900 text-white">
-                <h3 className="font-bold mb-3">Quantum Mechanics in Ordinals</h3>
-                <div className="space-y-4">
-                  <p className="text-sm">
-                    Our cat ordinals are inspired by Schrödinger's famous thought experiment, 
-                    where a cat in a box can exist in multiple states simultaneously until observed.
-                  </p>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">Quantum States</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-purple-500 flex-shrink-0 mt-0.5"></div>
-                        <div>
-                          <span className="font-medium">Superposition</span>
-                          <p className="text-xs text-white/70">Exists in multiple potential states simultaneously</p>
+                <TabsContent value="quantum" className="p-4 bg-purple-950/50 rounded-lg border border-purple-900 text-white">
+                  <h3 className="font-bold mb-3">Quantum Mechanics in Ordinals</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm">
+                      Our cat ordinals are inspired by Schrödinger's famous thought experiment, 
+                      where a cat in a box can exist in multiple states simultaneously until observed.
+                    </p>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Quantum States</h4>
+                      <ul className="space-y-2">
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-purple-500 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <span className="font-medium">Superposition</span>
+                            <p className="text-xs text-white/70">Exists in multiple potential states simultaneously</p>
+                          </div>
+                        </li>
+                        
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-blue-500 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <span className="font-medium">Entanglement</span>
+                            <p className="text-xs text-white/70">Connected to Bitcoin blockchain data in non-local ways</p>
+                          </div>
+                        </li>
+                        
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-green-500 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <span className="font-medium">Observation</span>
+                            <p className="text-xs text-white/70">The act of measuring forces a definite state</p>
+                          </div>
+                        </li>
+                        
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-amber-500 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <span className="font-medium">Collapse</span>
+                            <p className="text-xs text-white/70">Final determined state with fixed properties</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full mt-2 text-white border-white/20 hover:bg-white/10">
+                          Learn More About Quantum Principles
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Quantum Principles in Ordinals</DialogTitle>
+                          <DialogDescription>
+                            How we apply quantum physics to blockchain collectibles
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4">
+                          <p>
+                            Schrödinger's cat is a thought experiment devised by physicist Erwin Schrödinger in 1935. 
+                            In this experiment, a cat is placed in a sealed box with a radioactive atom, a Geiger counter, 
+                            and a poison. If the atom decays, the Geiger counter detects it and triggers the release of poison, killing the cat.
+                          </p>
+                          
+                          <p>
+                            According to quantum mechanics, until the box is opened and the cat is observed, the 
+                            atom exists in a superposition of both decayed and not decayed states. Consequently, 
+                            the cat would be both alive and dead at the same time - existing in multiple states simultaneously.
+                          </p>
+                          
+                          <p>
+                            We apply this concept to our ordinals. Each cat ordinal exists in multiple potential 
+                            states until it's "observed" (purchased or minted), at which point its attributes become fixed.
+                            The quantum states are influenced by real Bitcoin blockchain data, creating unique collectibles 
+                            that represent a fusion of quantum physics and blockchain technology.
+                          </p>
                         </div>
-                      </li>
-                      
-                      <li className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-500 flex-shrink-0 mt-0.5"></div>
-                        <div>
-                          <span className="font-medium">Entanglement</span>
-                          <p className="text-xs text-white/70">Connected to Bitcoin blockchain data in non-local ways</p>
-                        </div>
-                      </li>
-                      
-                      <li className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-green-500 flex-shrink-0 mt-0.5"></div>
-                        <div>
-                          <span className="font-medium">Observation</span>
-                          <p className="text-xs text-white/70">The act of measuring forces a definite state</p>
-                        </div>
-                      </li>
-                      
-                      <li className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-amber-500 flex-shrink-0 mt-0.5"></div>
-                        <div>
-                          <span className="font-medium">Collapse</span>
-                          <p className="text-xs text-white/70">Final determined state with fixed properties</p>
-                        </div>
-                      </li>
-                    </ul>
+                      </DialogContent>
+                    </Dialog>
                   </div>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full mt-2 text-white border-white/20 hover:bg-white/10">
-                        Learn More About Quantum Principles
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-lg">
-                      <DialogHeader>
-                        <DialogTitle>Quantum Principles in Ordinals</DialogTitle>
-                        <DialogDescription>
-                          How we apply quantum physics to blockchain collectibles
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="space-y-4">
-                        <p>
-                          Schrödinger's cat is a thought experiment devised by physicist Erwin Schrödinger in 1935. 
-                          In this experiment, a cat is placed in a sealed box with a radioactive atom, a Geiger counter, 
-                          and a poison. If the atom decays, the Geiger counter detects it and triggers the release of poison, killing the cat.
-                        </p>
+                </TabsContent>
+                
+                <TabsContent value="bitcoin" className="p-4 bg-amber-950/50 rounded-lg border border-amber-900 text-white">
+                  <h3 className="font-bold mb-3">Bitcoin Data Sources</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm">
+                      Our cat ordinals draw data from significant Bitcoin blocks and market events to 
+                      influence their properties and rarity.
+                    </p>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Key Bitcoin Metrics Used</h4>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span>Block height and hash</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span>Transaction count and fees</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span>Price and volatility at block time</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                          <span>Merkle root entropy</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Notable Bitcoin Events</h4>
+                      <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
+                        {BITCOIN_HEADLINES.map((event, index) => (
+                          <div key={index} className="text-xs p-2 bg-black/20 rounded">
+                            <span className="font-medium">{event.date}</span>
+                            <p>{event.headline}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <p className="text-xs text-white/70">
+                        These Bitcoin events and metrics directly influence the rarity, 
+                        appearance, and special properties of each cat ordinal.
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="process" className="p-4 bg-blue-950/50 rounded-lg border border-blue-900 text-white">
+                  <h3 className="font-bold mb-3">The Creation Process</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm">
+                      How we transform Bitcoin data and quantum mechanics into unique cat ordinals:
+                    </p>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Creation Steps</h4>
+                      <ol className="space-y-3 relative border-l border-blue-800 pl-6 ml-3">
+                        <li className="relative">
+                          <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
+                          <h5 className="font-medium">Bitcoin Data Extraction</h5>
+                          <p className="text-xs text-white/70">
+                            We pull data from significant Bitcoin blocks that represent important moments
+                            in cryptocurrency history.
+                          </p>
+                        </li>
                         
-                        <p>
-                          According to quantum mechanics, until the box is opened and the cat is observed, the 
-                          atom exists in a superposition of both decayed and not decayed states. Consequently, 
-                          the cat would be both alive and dead at the same time - existing in multiple states simultaneously.
-                        </p>
+                        <li className="relative">
+                          <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
+                          <h5 className="font-medium">Quantum Algorithm Application</h5>
+                          <p className="text-xs text-white/70">
+                            The data enters a quantum-inspired algorithm that maintains multiple potential 
+                            states until observation.
+                          </p>
+                        </li>
                         
-                        <p>
-                          We apply this concept to our ordinals. Each cat ordinal exists in multiple potential 
-                          states until it's "observed" (purchased or minted), at which point its attributes become fixed.
-                          The quantum states are influenced by real Bitcoin blockchain data, creating unique collectibles 
-                          that represent a fusion of quantum physics and blockchain technology.
+                        <li className="relative">
+                          <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
+                          <h5 className="font-medium">State Collapse</h5>
+                          <p className="text-xs text-white/70">
+                            Upon inscription to the blockchain, the quantum state collapses into a 
+                            unique cat ordinal with defined attributes.
+                          </p>
+                        </li>
+                        
+                        <li className="relative">
+                          <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
+                          <h5 className="font-medium">Ordinal Finalization</h5>
+                          <p className="text-xs text-white/70">
+                            The final cat ordinal is created with its specific traits, pattern, 
+                            and special features determined by the quantum collapse.
+                          </p>
+                        </li>
+                      </ol>
+                    </div>
+                    
+                    <div className="bg-blue-900/30 p-3 rounded-md mt-4">
+                      <h4 className="text-sm font-medium mb-1 flex items-center">
+                        <Info className="h-4 w-4 mr-2" />
+                        Schrödinger's Blockchain
+                      </h4>
+                      <p className="text-xs">
+                        Just as Schrödinger's cat exists in multiple states until observed, 
+                        our cat ordinals have an infinite set of potential traits until they are 
+                        inscribed on the blockchain, at which point they collapse into a single, 
+                        observable reality.
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="ascii" className="p-4 bg-green-950/50 rounded-lg border border-green-900 text-white">
+                  <h3 className="font-bold mb-3">ASCII Art Generation</h3>
+                  <div className="space-y-4">
+                    <p className="text-sm">
+                      Each cat ordinal can be represented as ASCII art, creating a retro-aesthetic that 
+                      pays homage to early computer art while incorporating modern blockchain data.
+                    </p>
+                    
+                    {step === 3 ? (
+                      <div>
+                        <div className="bg-black border border-green-900 p-3 rounded font-mono text-xs overflow-auto max-h-[260px] whitespace-pre">
+                          {generateAdvancedCatASCII(
+                            {
+                              rarity: catTraits.rarity,
+                              pattern: catTraits.pattern,
+                              eyeStyle: 'quantum',
+                              whiskerStyle: 'long',
+                              special: catTraits.special,
+                              expression: 'wise',
+                              accessories: catTraits.special ? ['hat', 'bowtie'] : []
+                            },
+                            {
+                              width: 40,
+                              colorMode: 'ansi',
+                              detailLevel: 'high'
+                            }
+                          )}
+                        </div>
+                        
+                        <Button 
+                          onClick={() => setShowAsciiVisualizer(true)}
+                          className="w-full mt-4 bg-green-800 hover:bg-green-700"
+                        >
+                          <Terminal className="h-4 w-4 mr-2" />
+                          Open Full ASCII Art Visualizer
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="bg-black border border-green-900 p-4 rounded text-center">
+                        <Terminal className="h-10 w-10 mx-auto mb-2 text-green-500 opacity-50" />
+                        <p className="text-green-500 opacity-70">
+                          Complete the quantum generation process to unlock ASCII art generation
                         </p>
                       </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="bitcoin" className="p-4 bg-amber-950/50 rounded-lg border border-amber-900 text-white">
-                <h3 className="font-bold mb-3">Bitcoin Data Sources</h3>
-                <div className="space-y-4">
-                  <p className="text-sm">
-                    Our cat ordinals draw data from significant Bitcoin blocks and market events to 
-                    influence their properties and rarity.
-                  </p>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">Key Bitcoin Metrics Used</h4>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span>Block height and hash</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span>Transaction count and fees</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span>Price and volatility at block time</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span>Merkle root entropy</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">Notable Bitcoin Events</h4>
-                    <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
-                      {BITCOIN_HEADLINES.map((event, index) => (
-                        <div key={index} className="text-xs p-2 bg-black/20 rounded">
-                          <span className="font-medium">{event.date}</span>
-                          <p>{event.headline}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <p className="text-xs text-white/70">
-                      These Bitcoin events and metrics directly influence the rarity, 
-                      appearance, and special properties of each cat ordinal.
-                    </p>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="process" className="p-4 bg-blue-950/50 rounded-lg border border-blue-900 text-white">
-                <h3 className="font-bold mb-3">The Creation Process</h3>
-                <div className="space-y-4">
-                  <p className="text-sm">
-                    How we transform Bitcoin data and quantum mechanics into unique cat ordinals:
-                  </p>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium mb-1">Creation Steps</h4>
-                    <ol className="space-y-3 relative border-l border-blue-800 pl-6 ml-3">
-                      <li className="relative">
-                        <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
-                        <h5 className="font-medium">Bitcoin Data Extraction</h5>
-                        <p className="text-xs text-white/70">
-                          We pull data from significant Bitcoin blocks that represent important moments
-                          in cryptocurrency history.
-                        </p>
-                      </li>
-                      
-                      <li className="relative">
-                        <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
-                        <h5 className="font-medium">Quantum Algorithm Application</h5>
-                        <p className="text-xs text-white/70">
-                          The data enters a quantum-inspired algorithm that maintains multiple potential 
-                          states until observation.
-                        </p>
-                      </li>
-                      
-                      <li className="relative">
-                        <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
-                        <h5 className="font-medium">State Collapse</h5>
-                        <p className="text-xs text-white/70">
-                          Upon inscription to the blockchain, the quantum state collapses into a 
-                          unique cat ordinal with defined attributes.
-                        </p>
-                      </li>
-                      
-                      <li className="relative">
-                        <div className="absolute -left-[27px] mt-1.5 w-4 h-4 rounded-full bg-blue-600"></div>
-                        <h5 className="font-medium">Bitcoin Inscription</h5>
-                        <p className="text-xs text-white/70">
-                          The final cat ordinal is permanently inscribed onto a Bitcoin satoshi, 
-                          becoming an immutable digital artifact.
-                        </p>
-                      </li>
-                    </ol>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <p className="text-xs text-white/70">
-                      Each of the 3,333 cat ordinals is created using this meticulous process, 
-                      ensuring uniqueness and cryptographic provenance.
-                    </p>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="ascii" className="p-4 bg-green-950/50 rounded-lg border border-green-900 text-white">
-                <h3 className="font-bold mb-3">ASCII Art Visualization</h3>
-                <div className="space-y-4">
-                  <p className="text-sm">
-                    Each cat ordinal can be represented as ASCII art, preserving its unique attributes
-                    and blockchain-derived properties in text form.
-                  </p>
-                  
-                  {step === 3 ? (
-                    <div className="bg-black/50 p-4 rounded-lg font-mono text-xs text-green-400 overflow-auto max-h-60">
-                      <pre>
-                        {generateAdvancedCatASCII(catTraits.rarity, bitcoinData.block, quantumState)}
-                      </pre>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center p-8 bg-black/50 rounded-lg">
-                      <p className="text-gray-400 italic">
-                        Complete the visualization process to generate ASCII art
+                    )}
+                    
+                    <div className="text-xs text-white/70 space-y-2">
+                      <p>
+                        Our ASCII art generation creates unique representations based on:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Bitcoin block data</li>
+                        <li>Rarity traits</li>
+                        <li>Quantum state properties</li>
+                        <li>Special features</li>
+                      </ul>
+                      <p>
+                        The ASCII art maintains the same quantum principles as the visual representation,
+                        making each one unique and tied to its blockchain origins.
                       </p>
                     </div>
-                  )}
-                  
-                  {step === 3 && (
-                    <div className="pt-2 space-y-4">
-                      <p className="text-xs text-white/70">
-                        ASCII art preserves the cryptographic properties of the ordinal in a format
-                        that's viewable on any device, even those without graphical interfaces.
-                      </p>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full text-white border-white/20 hover:bg-white/10"
-                        onClick={() => setShowAsciiVisualizer(true)}
-                      >
-                        <Terminal className="h-4 w-4 mr-2" />
-                        Open Full ASCII Art Visualizer
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            {isPlaying && step < 3 && (
-              <div className="bg-black/50 border border-white/10 rounded-lg p-4">
-                <h3 className="font-bold text-white mb-2">Live Data</h3>
-                
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-white/60">Bitcoin Block</span>
-                    <p className="font-medium text-white">{bitcoinData.block}</p>
                   </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Transactions</span>
-                    <p className="font-medium text-white">{bitcoinData.transactions.toLocaleString()}</p>
+                </TabsContent>
+              </Tabs>
+              
+              <div className="bg-black/40 rounded-lg p-4 text-white border border-white/10">
+                <h3 className="font-bold mb-2 flex items-center">
+                  <GitBranch className="h-4 w-4 mr-2 text-blue-400" />
+                  Technical Specifications
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Blockchain</span>
+                    <span>Bitcoin</span>
                   </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Price at Block</span>
-                    <p className="font-medium text-white">${bitcoinData.price.toLocaleString()}</p>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Standard</span>
+                    <span>Ordinals</span>
                   </div>
-                  
-                  <div>
-                    <span className="text-xs text-white/60">Quantum State</span>
-                    <p className="font-medium text-white capitalize">{quantumState}</p>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Total Supply</span>
+                    <span>3,333</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Generation Method</span>
+                    <span>Quantum-Inspired Algorithm</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Data Sources</span>
+                    <span>Bitcoin + Quantum States</span>
                   </div>
                 </div>
               </div>
-            )}
-            
-            <Button 
-              onClick={isPlaying ? resetVisualizer : startVisualizer} 
-              className={`w-full ${
-                isPlaying 
-                  ? 'bg-red-600 hover:bg-red-700 text-white' 
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
-            >
-              {isPlaying ? 'Stop Visualization' : 'Start Visualization'}
-            </Button>
+            </div>
           </div>
-        </div>
-        
-        <div className="p-4 border-t border-white/10 text-center text-white/60 text-sm">
-          <p>A product of CatDAO.org - Bringing quantum principles to Bitcoin ordinals</p>
         </div>
       </div>
     </div>
