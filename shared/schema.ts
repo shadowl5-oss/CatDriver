@@ -148,6 +148,7 @@ export const lostPets = pgTable("lost_pets", {
   imageUrl: text("image_url"),
   rewardAmount: doublePrecision("reward_amount"),
   isFound: boolean("is_found").default(false),
+  musicThemeId: text("music_theme_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
@@ -161,7 +162,8 @@ export const insertLostPetSchema = createInsertSchema(lostPets).pick({
   contactInfo: true,
   imageUrl: true,
   rewardAmount: true,
-  isFound: true
+  isFound: true,
+  musicThemeId: true
 });
 
 // Lost Pet Sighting table
