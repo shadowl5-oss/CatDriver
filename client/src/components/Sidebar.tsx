@@ -21,6 +21,7 @@ export default function Sidebar({ visible }: SidebarProps) {
     { name: 'Ordinals', href: '/ordinals', icon: Cat },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
+    { name: 'Canvas Demo', href: '/canvas-demo', icon: Cpu },
   ];
 
   const adminLinks = [

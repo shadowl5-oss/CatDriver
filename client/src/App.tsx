@@ -15,6 +15,7 @@ import Staking from './pages/Staking';
 import Wallet from './pages/Wallet';
 import Presentation from './pages/Presentation';
 import NotFound from './pages/NotFound';
+import CanvasDemo from './pages/canvas-demo';
 import OrdinalGenerator from './pages/admin/OrdinalGenerator';
 import Sidebar from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -83,6 +84,7 @@ function App() {
             <Route path="/" component={Home} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/ordinals" component={Ordinals} />
+            <Route path="/canvas-demo" component={CanvasDemo} />
             <ProtectedRoute path="/marketplace" component={Marketplace} />
             <ProtectedRoute path="/portfolio" component={Portfolio} />
             <ProtectedRoute path="/governance" component={Governance} />

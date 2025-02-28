@@ -4,13 +4,17 @@ interface CatLogoProps {
   className?: string;
   width?: number;
   height?: number;
+  size?: number;
 }
 
-export const CatLogo: React.FC<CatLogoProps> = ({ className = "", width = 40, height = 40 }) => {
+export const CatLogo: React.FC<CatLogoProps> = ({ className = "", width = 40, height = 40, size }) => {
+  // If size is provided, use it for both width and height
+  const computedWidth = size || width;
+  const computedHeight = size || height;
   return (
     <svg 
-      width={width} 
-      height={height} 
+      width={computedWidth} 
+      height={computedHeight} 
       viewBox="0 0 300 300" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
