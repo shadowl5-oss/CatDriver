@@ -128,7 +128,7 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
         setCurrentTheme(theme);
       }
     }
-  }, [pet.musicThemeId]);
+  }, [pet.musicThemeId, musicThemes]);
   
   // Handle music theme selection
   const handleSelectMusicTheme = (theme: MusicTheme) => {
@@ -267,6 +267,33 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
             </CardContent>
           </Card>
 
+          {/* Music Player Section */}
+          <div className="mt-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Music className="h-4 w-4 mr-2" /> 
+              Pet Music Theme
+            </h3>
+            
+            <PetMusicPlayer 
+              theme={currentTheme} 
+              onThemeChange={() => {}} 
+              autoPlay={false}
+              loop={true}
+              className="mb-2"
+            />
+            
+            <MusicThemeSelector 
+              onSelect={handleSelectMusicTheme}
+              currentThemeId={currentTheme?.id}
+              trigger={
+                <Button variant="outline" className="w-full mt-2">
+                  <Music className="mr-2 h-4 w-4" />
+                  {currentTheme ? "Change Music Theme" : "Add Music Theme"}
+                </Button>
+              }
+            />
+          </div>
+          
           {!pet.isFound && (
             <Button 
               onClick={() => onMarkAsFound(pet)} 
@@ -317,7 +344,7 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
                 <p>Loading sightings...</p>
               ) : sightings.length > 0 ? (
                 <div className="space-y-4">
-                  {sightings.map((sighting) => (
+                  {sightings.map((sighting: LostPetSighting) => (
                     <Card key={sighting.id}>
                       <CardContent className="pt-6">
                         <div className="flex justify-between">
