@@ -723,6 +723,20 @@ export class DatabaseStorage implements IStorage {
     return updatedLostPet;
   }
   
+  async updateLostPetMusicTheme(id: number, musicThemeId: string): Promise<LostPet> {
+    await db.update(lostPets)
+      .set({ musicThemeId, updatedAt: new Date() })
+      .where(eq(lostPets.id, id));
+      
+    const [updatedLostPet] = await db.select().from(lostPets).where(eq(lostPets.id, id));
+    
+    if (!updatedLostPet) {
+      throw new Error(`Failed to retrieve updated lost pet with ID ${id}`);
+    }
+    
+    return updatedLostPet;
+  }
+  
   // Lost Pet Sightings methods
   async getLostPetSighting(id: number): Promise<LostPetSighting | undefined> {
     const results = await db.select().from(lostPetSightings).where(eq(lostPetSightings.id, id));

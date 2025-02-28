@@ -273,6 +273,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.patch("/api/lost-pets/:id/music-theme", async (req, res) => {
+    try {
+      const petId = parseInt(req.params.id);
+      const { musicThemeId } = req.body;
+      
+      if (typeof musicThemeId !== "string") {
+        return res.status(400).json({ message: "Invalid music theme data. 'musicThemeId' must be a string." });
+      }
+      
+      const updatedPet = await storage.updateLostPetMusicTheme(petId, musicThemeId);
+      res.json(updatedPet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update lost pet music theme" });
+    }
+  });
+  
   // Lost Pet Sighting routes
   app.get("/api/lost-pet-sightings/:lostPetId", async (req, res) => {
     try {
