@@ -18,11 +18,28 @@ import { Link } from "wouter";
 import { ArrowLeft, Database, Atom, Download, ListFilter, Braces, Save, Webhook } from "lucide-react";
 
 // Define a structure for an ordinal batch generation process
+interface Ordinal {
+  id: number;
+  name: string;
+  rarity: string;
+  type: TraitSet;
+  image: string;
+  price: number;
+  tokenId: string;
+  ownerId: number;
+  blockHeight: number;
+  btcPrice: number;
+  description: string;
+  createdAt: string;
+  quantumState: string;
+  entropy: number;
+}
+
 interface GenerationProcess {
   batchSize: number;
   batchesCompleted: number;
   totalBatches: number;
-  currentBatch: number[];
+  currentBatch: Ordinal[];
   progress: number;
   isRunning: boolean;
   isPaused: boolean;
@@ -188,7 +205,8 @@ export default function OrdinalGenerator() {
   // Start batch generation process
   const startBatchGeneration = () => {
     // Check if we've already generated close to 3,333 ordinals
-    if (existingOrdinalsCount && existingOrdinalsCount > 3300) {
+    const ordinalCount = existingOrdinalsCount as number || 0;
+    if (ordinalCount > 3300) {
       toast({
         title: "Generation Limit Reached",
         description: "You have already generated close to 3,333 ordinals",
@@ -221,7 +239,7 @@ export default function OrdinalGenerator() {
     
     // Calculate how many ordinals are left to generate
     const totalToGenerate = 3333;
-    const generated = existingOrdinalsCount || 0;
+    const generated = (existingOrdinalsCount as number) || 0;
     const remaining = totalToGenerate - generated;
     
     // If we've generated all ordinals or more, stop
@@ -417,12 +435,12 @@ export default function OrdinalGenerator() {
                     <div className="flex justify-between text-sm">
                       <span>Overall Progress</span>
                       <span>
-                        {existingOrdinalsCount || 0} of 3,333 Ordinals 
-                        ({Math.round(((existingOrdinalsCount || 0) / 3333) * 100)}%)
+                        {(existingOrdinalsCount as number) || 0} of 3,333 Ordinals 
+                        ({Math.round((((existingOrdinalsCount as number) || 0) / 3333) * 100)}%)
                       </span>
                     </div>
                     <Progress 
-                      value={Math.round(((existingOrdinalsCount || 0) / 3333) * 100)} 
+                      value={Math.round((((existingOrdinalsCount as number) || 0) / 3333) * 100)} 
                       className="h-2" 
                     />
                   </div>
@@ -513,11 +531,11 @@ export default function OrdinalGenerator() {
                       <Button 
                         className="w-full" 
                         onClick={startBatchGeneration}
-                        disabled={isLoadingCount || (existingOrdinalsCount && existingOrdinalsCount >= 3333)}
+                        disabled={isLoadingCount || ((existingOrdinalsCount as number) >= 3333)}
                       >
                         <Database className="h-4 w-4 mr-2" />
                         {isLoadingCount ? "Loading..." : 
-                          existingOrdinalsCount && existingOrdinalsCount >= 3333 
+                          ((existingOrdinalsCount as number) >= 3333)
                             ? "All Ordinals Generated" 
                             : "Start Generating 3,333 Ordinals"}
                       </Button>
