@@ -67,10 +67,10 @@ export default function Marketplace() {
   
   // Generate trending collections (mock data)
   const trendingCollections = [
-    { name: "Crypto Cats", floor: 3.5, volume: 2540, change: "+15.2%" },
-    { name: "Space Kittens", floor: 2.1, volume: 1870, change: "+8.7%" },
-    { name: "Purr Punks", floor: 1.8, volume: 1320, change: "+5.3%" },
-    { name: "Meow Meow Club", floor: 0.8, volume: 950, change: "+2.1%" }
+    { name: "Quantum Cats", floor: 3.5, volume: 2540, change: "+15.2%" },
+    { name: "Bitcoin Cats", floor: 2.1, volume: 1870, change: "+8.7%" },
+    { name: "Cypherpunk Cats", floor: 1.8, volume: 1320, change: "+5.3%" },
+    { name: "Schrodinger Cats", floor: 0.8, volume: 950, change: "+2.1%" }
   ];
   
   return (
@@ -254,7 +254,7 @@ export default function Marketplace() {
                       <SimpleAsciiArt type="quantum" width={48} height={48} isProfileImage={true} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold">Siamese #291</p>
+                      <p className="font-semibold">Quantum Cat #291</p>
                       <p className="text-xs text-muted-foreground">Sold 5 minutes ago</p>
                     </div>
                     <div className="text-right">
@@ -267,7 +267,7 @@ export default function Marketplace() {
                       <SimpleAsciiArt type="bitcoin" width={48} height={48} isProfileImage={true} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold">Sphinx #042</p>
+                      <p className="font-semibold">Bitcoin Cat #042</p>
                       <p className="text-xs text-muted-foreground">Sold 15 minutes ago</p>
                     </div>
                     <div className="text-right">
@@ -280,7 +280,7 @@ export default function Marketplace() {
                       <SimpleAsciiArt type="cypherpunk" width={48} height={48} isProfileImage={true} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold">Maine Coon #108</p>
+                      <p className="font-semibold">Cypherpunk Cat #108</p>
                       <p className="text-xs text-muted-foreground">Sold 32 minutes ago</p>
                     </div>
                     <div className="text-right">
@@ -293,7 +293,7 @@ export default function Marketplace() {
                       <SimpleAsciiArt type="schrodinger" width={48} height={48} isProfileImage={true} />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold">Tabby #573</p>
+                      <p className="font-semibold">Schrodinger Cat #573</p>
                       <p className="text-xs text-muted-foreground">Sold 45 minutes ago</p>
                     </div>
                     <div className="text-right">

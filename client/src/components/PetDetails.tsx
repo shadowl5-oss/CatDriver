@@ -318,7 +318,7 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
                         <FormItem>
                           <FormLabel>Your Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder="Your full name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -346,7 +346,7 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
                         <FormItem>
                           <FormLabel>Your Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="(123) 456-7890" {...field} />
+                            <Input placeholder="Your contact number" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -359,7 +359,7 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
                         <FormItem>
                           <FormLabel>Your Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="you@example.com" {...field} />
+                            <Input placeholder="your.email@example.com" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
