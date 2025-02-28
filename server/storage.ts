@@ -46,6 +46,7 @@ export interface IStorage {
   getLostPetsByUserId(userId: number): Promise<LostPet[]>;
   createLostPet(lostPet: InsertLostPet): Promise<LostPet>;
   updateLostPetStatus(id: number, isFound: boolean): Promise<LostPet>;
+  updateLostPetMusicTheme(id: number, musicThemeId: string): Promise<LostPet>;
   
   // Lost Pet Sightings methods
   getLostPetSighting(id: number): Promise<LostPetSighting | undefined>;
@@ -267,6 +268,7 @@ export class MemStorage implements IStorage {
       imageUrl: insertLostPet.imageUrl || null,
       rewardAmount: insertLostPet.rewardAmount || null,
       isFound: insertLostPet.isFound ?? false,
+      musicThemeId: insertLostPet.musicThemeId || null,
       createdAt: now,
       updatedAt: now
     };
@@ -284,6 +286,23 @@ export class MemStorage implements IStorage {
     const updatedLostPet = {
       ...lostPet,
       isFound,
+      updatedAt: new Date()
+    };
+    
+    this.lostPets.set(id, updatedLostPet);
+    return updatedLostPet;
+  }
+  
+  async updateLostPetMusicTheme(id: number, musicThemeId: string): Promise<LostPet> {
+    const lostPet = this.lostPets.get(id);
+    
+    if (!lostPet) {
+      throw new Error(`Lost pet with ID ${id} not found`);
+    }
+    
+    const updatedLostPet = {
+      ...lostPet,
+      musicThemeId,
       updatedAt: new Date()
     };
     
