@@ -73,6 +73,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get count of existing cat NFTs
+  app.get("/api/cat-nfts/count", async (req, res) => {
+    try {
+      const nfts = await storage.getAllCatNfts();
+      res.json(nfts.length);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get NFT count" });
+    }
+  });
+  
   app.get("/api/cat-nfts/user/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
@@ -93,6 +103,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid NFT data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create NFT" });
+    }
+  });
+  
+  // Batch create NFTs for ordinal generation
+  app.post("/api/cat-nfts/batch", async (req, res) => {
+    try {
+      if (!Array.isArray(req.body)) {
+        return res.status(400).json({ message: "Request body must be an array of NFTs" });
+      }
+      
+      // Validate each NFT in the batch
+      const nftDataArray = req.body.map(nft => insertCatNftSchema.parse(nft));
+      
+      // Create NFTs one by one
+      const createdNfts = [];
+      for (const nftData of nftDataArray) {
+        const nft = await storage.createCatNft(nftData);
+        createdNfts.push(nft);
+      }
+      
+      res.status(201).json(createdNfts);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid NFT data in batch", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create NFT batch" });
     }
   });
   
