@@ -276,6 +276,15 @@ export default function PetMusicPlayer({
               <span>{formatTime((progress / 100) * duration)}</span>
               <span>{formatTime(duration)}</span>
             </div>
+            
+            {/* Audio playback notice for Replit environment */}
+            {isPlaying && (
+              <div className="bg-accent/20 rounded-md p-2 text-xs text-center">
+                <p className="text-muted-foreground">
+                  Note: Audio playback may be restricted in Replit. Visualized playback is shown here.
+                </p>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2">

@@ -14,6 +14,9 @@ import LostPets from './pages/LostPets';
 import Staking from './pages/Staking';
 import Wallet from './pages/Wallet';
 import Presentation from './pages/Presentation';
+import Whitepaper from './pages/Whitepaper';
+import Partners from './pages/Partners';
+import NietzschesCat from './pages/NietzschesCat';
 import NotFound from './pages/NotFound';
 import CanvasDemo from './pages/canvas-demo';
 import OrdinalGenerator from './pages/admin/OrdinalGenerator';
@@ -85,6 +88,9 @@ function App() {
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/ordinals" component={Ordinals} />
             <Route path="/canvas-demo" component={CanvasDemo} />
+            <Route path="/whitepaper" component={Whitepaper} />
+            <Route path="/partners" component={Partners} />
+            <Route path="/nietzschescat" component={NietzschesCat} />
             <ProtectedRoute path="/marketplace" component={Marketplace} />
             <ProtectedRoute path="/portfolio" component={Portfolio} />
             <ProtectedRoute path="/governance" component={Governance} />
