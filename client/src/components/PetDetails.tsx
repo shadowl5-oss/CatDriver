@@ -274,13 +274,22 @@ export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsPro
               Pet Music Theme
             </h3>
             
-            <PetMusicPlayer 
-              theme={currentTheme} 
-              onThemeChange={() => {}} 
-              autoPlay={false}
-              loop={true}
-              className="mb-2"
-            />
+            {currentTheme ? (
+              <PetMusicPlayer 
+                theme={currentTheme} 
+                onThemeChange={() => {}} 
+                autoPlay={false}
+                loop={true}
+                className="mb-2"
+              />
+            ) : (
+              <div className="bg-muted rounded-md p-4 text-center mb-2">
+                <p className="text-sm text-muted-foreground">
+                  No music theme selected for {pet.name}. 
+                  Add a personalized theme to enhance this pet's profile.
+                </p>
+              </div>
+            )}
             
             <MusicThemeSelector 
               onSelect={handleSelectMusicTheme}
