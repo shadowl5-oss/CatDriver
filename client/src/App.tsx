@@ -1,98 +1,82 @@
-import { Route, Switch } from 'wouter';
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
-import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "@/hooks/use-auth";
 import { useState, useEffect } from 'react';
-
-// Import pages
-import Home from '@/pages/Home';
-import Dashboard from "@/pages/Dashboard";
-import Ordinals from "@/pages/Ordinals";
-import Marketplace from "@/pages/Marketplace";
-import Portfolio from "@/pages/Portfolio";
-import Governance from "@/pages/Governance";
-import LostPets from "@/pages/LostPets";
-import Staking from "@/pages/Staking";
-import Wallet from "@/pages/Wallet";
-import Presentation from "@/pages/Presentation";
-import OrdinalGenerator from "@/pages/admin/OrdinalGenerator";
-import NotFound from "@/pages/NotFound";
-
-// Protected route component for password-based authentication
-function ProtectedRoute({ component: Component, ...rest }: { 
-  component: React.ComponentType<any>, 
-  path?: string 
-}) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isPrompting, setIsPrompting] = useState(true);
-  
-  useEffect(() => {
-    const checkAuth = () => {
-      const password = window.prompt("Enter password to access this page:");
-      if (password === "catdao2025") {
-        setIsAuthenticated(true);
-        setIsPrompting(false);
-        localStorage.setItem("isAuthenticated", "true");
-      } else {
-        setIsAuthenticated(false);
-        setIsPrompting(false);
-        alert("Incorrect password");
-        window.location.href = "/";
-      }
-    };
-    
-    const storedAuth = localStorage.getItem("isAuthenticated");
-    if (storedAuth === "true") {
-      setIsAuthenticated(true);
-      setIsPrompting(false);
-    } else {
-      checkAuth();
-    }
-  }, []);
-  
-  if (isPrompting) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <p className="text-lg mb-2">Authenticating...</p>
-        <p className="text-sm text-muted-foreground">Please enter the password</p>
-      </div>
-    </div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <p className="text-lg mb-2">Authentication Required</p>
-        <p className="text-sm text-muted-foreground">You need to be authenticated to view this page</p>
-      </div>
-    </div>;
-  }
-  
-  return <Route {...rest} component={Component} />;
-}
+import { Route, Switch } from 'wouter';
+import Home from './pages/Home';
+import Ordinals from './pages/Ordinals';
+import Dashboard from './pages/Dashboard';
+import Marketplace from './pages/Marketplace';
+import NotFound from './pages/NotFound';
+import OrdinalGenerator from './pages/admin/OrdinalGenerator';
+import Sidebar from './components/Sidebar';
+import { ThemeProvider } from './components/theme-provider';
+import { ModeToggle } from './components/mode-toggle';
+import { useLocation } from 'wouter';
+import { Toaster } from './components/ui/sonner';
 
 function App() {
+  const [location] = useLocation();
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [currentBg, setCurrentBg] = useState<number>(0);
+
+  // Background animation effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % 3);
+    }, 30000); // Change every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/ordinals" component={Ordinals} />
-          <ProtectedRoute path="/marketplace" component={Marketplace} />
-          <ProtectedRoute path="/portfolio" component={Portfolio} />
-          <ProtectedRoute path="/governance" component={Governance} />
-          <ProtectedRoute path="/lost-pets" component={LostPets} />
-          <ProtectedRoute path="/staking" component={Staking} />
-          <ProtectedRoute path="/wallet" component={Wallet} />
-          <ProtectedRoute path="/presentation" component={Presentation} />
-          <ProtectedRoute path="/admin/generator" component={OrdinalGenerator} />
-          <Route component={NotFound} />
-        </Switch>
+    <ThemeProvider defaultTheme="dark" storageKey="catdao-theme">
+      <div className="relative min-h-screen flex flex-col">
+        {/* Ambient background */}
+        <div className="ambient-bg"></div>
+
+        <div className={`fixed z-50 top-4 right-4 ${!showSidebar ? 'left-4' : 'left-[280px]'} h-12 transition-all duration-300 flex items-center justify-between bg-background/80 backdrop-blur-md rounded-lg px-4 shadow-md border border-border/50`}>
+          <button 
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="p-2 rounded-md hover:bg-secondary text-muted-foreground"
+          >
+            {showSidebar ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            )}
+          </button>
+
+          <div className="flex-1 mx-4">
+            <div className="text-sm font-medium">
+              {location === '/' && 'Home'}
+              {location === '/ordinals' && 'Ordinals Explorer'}
+              {location === '/dashboard' && 'Dashboard'}
+              {location === '/marketplace' && 'Marketplace'}
+              {location === '/admin/generator' && 'Ordinal Generator'}
+            </div>
+          </div>
+
+          <ModeToggle />
+        </div>
+
+        <div className="flex-1 flex">
+          <Sidebar visible={showSidebar} />
+
+          <main className={`flex-1 pt-16 transition-all duration-300 ${showSidebar ? 'pl-[280px]' : 'pl-0'}`}>
+            <div className="container py-6 mx-auto relative min-h-[calc(100vh-4rem)]">
+              <Switch>
+                <Route path="/" component={Home} />
+                <Route path="/ordinals" component={Ordinals} />
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="/marketplace" component={Marketplace} />
+                <Route path="/admin/generator" component={OrdinalGenerator} />
+                <Route component={NotFound} />
+              </Switch>
+            </div>
+          </main>
+        </div>
+
         <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+      </div>
+    </ThemeProvider>
   );
 }
 

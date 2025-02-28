@@ -1,98 +1,125 @@
-import { useLocation, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import CatLogo from "@/components/CatLogo";
-import SimpleAsciiArt from "@/components/SimpleAsciiArt";
 
-type SidebarProps = {
-  isVisible?: boolean;
-};
+import { Link, useLocation } from 'wouter';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Home, Cat, LayoutDashboard, ShoppingBag, Settings, 
+  Users, Bell, Cpu, Brain, PieChart
+} from 'lucide-react';
+import CatLogo from './CatLogo';
 
-export default function Sidebar({ isVisible = true }: SidebarProps) {
+interface SidebarProps {
+  visible: boolean;
+}
+
+export default function Sidebar({ visible }: SidebarProps) {
   const [location] = useLocation();
-  
-  const { data: currentUser } = useQuery({
-    queryKey: ['/api/current-user'],
-  });
+  const [expanded, setExpanded] = useState<string | null>(null);
 
-  const navItems = [
-    { path: "/", label: "Dashboard", icon: "fa-chart-line" },
-    { path: "/portfolio", label: "Portfolio", icon: "fa-briefcase" },
-    { path: "/marketplace", label: "Marketplace", icon: "fa-store" },
-    { path: "/ordinals", label: "Cat Ordinals", icon: "fa-cat" },
-    { path: "/wallet", label: "Wallet", icon: "fa-wallet" },
-    { path: "/governance", label: "Governance", icon: "fa-vote-yea" },
-    { path: "/staking", label: "Staking", icon: "fa-layer-group" },
-    { path: "/lost-pets", label: "Lost Pets", icon: "fa-paw" },
-    { path: "/explorer", label: "Blockchain Explorer", icon: "fa-cube" },
-    { path: "/presentation", label: "Presentation", icon: "fa-file-powerpoint" },
+  const mainLinks = [
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Ordinals', href: '/ordinals', icon: Cat },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
   ];
 
-  // If not visible on mobile, hide completely
-  const visibilityClass = isVisible ? "block" : "hidden md:block";
+  const adminLinks = [
+    { name: 'Ordinal Generator', href: '/admin/generator', icon: Cpu },
+  ];
+
+  const toggleSubmenu = (name: string) => {
+    if (expanded === name) {
+      setExpanded(null);
+    } else {
+      setExpanded(name);
+    }
+  };
+
+  const isActive = (href: string) => {
+    return location === href;
+  };
 
   return (
-    <aside className={`bg-card w-64 flex-shrink-0 ${visibilityClass} border-r border-border`}>
-      <div className="h-full flex flex-col">
-        {/* Logo */}
-        <div className="p-4 flex items-center space-x-2 border-b border-border">
-          <div className="text-primary p-1 rounded-lg">
-            <CatLogo width={36} height={36} />
+    <motion.aside 
+      initial={{ x: -280 }}
+      animate={{ x: visible ? 0 : -280 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed left-0 top-0 z-40 h-screen w-[280px] border-r border-border/30 backdrop-blur-lg bg-background/80"
+    >
+      <div className="flex h-full flex-col px-4">
+        <div className="py-6 flex items-center">
+          <CatLogo size={32} />
+          <span className="ml-3 text-xl font-bold text-gradient">CatDAO</span>
+        </div>
+
+        <div className="mt-2 space-y-1.5">
+          {mainLinks.map((link) => {
+            const LinkIcon = link.icon;
+            return (
+              <Link key={link.href} href={link.href}>
+                <a className={`flex items-center rounded-lg py-2.5 px-3.5 transition-colors ${
+                  isActive(link.href) 
+                    ? "bg-secondary text-primary font-medium" 
+                    : "text-muted-foreground hover:bg-secondary/40"
+                }`}>
+                  <LinkIcon className={`mr-3 h-5 w-5 ${isActive(link.href) ? "text-primary" : ""}`} />
+                  {link.name}
+                </a>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-6">
+          <div className="px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Administration
           </div>
-          <div className="flex flex-col">
-            <h1 className="font-bold text-xl font-[Orbitron]">Cat<span className="text-primary">Driven</span></h1>
-            <a href="https://catdao.org" className="text-xs text-muted-foreground hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">catdao.org</a>
+          <div className="mt-2 space-y-1.5">
+            {adminLinks.map((link) => {
+              const LinkIcon = link.icon;
+              return (
+                <Link key={link.href} href={link.href}>
+                  <a className={`flex items-center rounded-lg py-2.5 px-3.5 transition-colors ${
+                    isActive(link.href) 
+                      ? "bg-secondary text-primary font-medium" 
+                      : "text-muted-foreground hover:bg-secondary/40"
+                  }`}>
+                    <LinkIcon className={`mr-3 h-5 w-5 ${isActive(link.href) ? "text-primary" : ""}`} />
+                    {link.name}
+                  </a>
+                </Link>
+              );
+            })}
           </div>
         </div>
-        
-        {/* Nav Links */}
-        <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex items-center px-4 py-3 rounded-lg mb-1 transition-colors duration-200 
-              ${location === item.path 
-                ? "text-primary bg-primary/10 font-medium" 
-                : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              <i className={`fas ${item.icon} w-6`}></i>
-              <span className="ml-3 font-[Space_Grotesk]">{item.label}</span>
-              {location === item.path && (
-                <div className="ml-auto w-1.5 h-8 bg-primary rounded-full"></div>
-              )}
-            </Link>
-          ))}
-        </nav>
-        
-        {/* User Info */}
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-black overflow-hidden flex items-center justify-center">
-              <SimpleAsciiArt 
-                type="quantum" 
-                width={40} 
-                height={40} 
-                isProfileImage={true}
-              />
+
+        <div className="mt-auto pb-8">
+          <div className="glass rounded-lg p-4 my-4">
+            <div className="flex items-center mb-3">
+              <Brain size={18} className="text-primary mr-2" />
+              <h3 className="text-sm font-medium">CatDAO Intelligence</h3>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">
-                {currentUser?.displayName || "Crypto Kitten"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {currentUser?.isConnected 
-                  ? <span className="flex items-center"><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>Connected</span> 
-                  : <span className="flex items-center"><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span>Disconnected</span>
-                }
-              </p>
-            </div>
-            <button className="ml-auto text-muted-foreground hover:text-foreground">
-              <i className="fas fa-cog"></i>
+            <p className="text-xs text-muted-foreground">
+              Quantum analysis indicates a 24% increase in ordinal rarity metrics over the last epoch.
+            </p>
+            <button className="mt-3 text-xs font-medium text-primary hover:underline">
+              Learn more
             </button>
+          </div>
+
+          <div className="border-t border-border/30 pt-4 px-3">
+            <div className="flex items-center">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground font-bold">
+                C
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Quantum Observer</p>
+                <p className="text-xs text-muted-foreground">Advanced Access</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
