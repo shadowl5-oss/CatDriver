@@ -461,9 +461,7 @@ The Nietzsche's Cat Principle represents a novel theoretical framework that exte
 5. Leifer, M. S. (2014). Is the quantum state real? An extended review of ψ-ontology theorems. Quanta, 3(1), 67-155.
 6. Nietzsche, F. (1901). The Will to Power. (Concept adapted for quantum interpretation).
 7. Schlosshauer, M. (2007). Decoherence and the quantum-to-classical transition. Springer.
-8. Wheeler, J. A. (1983). Law without law. Quantum theory and measurement, 182-213.
-
-*For inquiries regarding this research or collaboration opportunities, please contact the Quantum Physics Simulator Research Group at quantum@example.com*`;
+8. Wheeler, J. A. (1983). Law without law. Quantum theory and measurement, 182-213.`;
 
       // Display the content with nice styling
       const htmlContent = `
