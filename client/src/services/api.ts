@@ -103,6 +103,11 @@ export const updateLostPetStatus = async (id: number, isFound: boolean) => {
   return res.json();
 };
 
+export const updateLostPetMusicTheme = async (id: number, musicThemeId: string) => {
+  const res = await apiRequest("PATCH", `/api/lost-pets/${id}/music-theme`, { musicThemeId });
+  return res.json();
+};
+
 // Lost Pet Sighting services
 export const fetchLostPetSightings = async (lostPetId: number) => {
   const res = await apiRequest("GET", `/api/lost-pet-sightings/${lostPetId}`, undefined);
@@ -194,6 +199,7 @@ export type LostPet = {
   microchipId: string | null;
   reward: number | null;
   userId: number;
+  musicThemeId?: string | null;
 };
 
 export type LostPetSighting = {

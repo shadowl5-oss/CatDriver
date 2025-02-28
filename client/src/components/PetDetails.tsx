@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { 
   fetchLostPetSightings, 
   createLostPetSighting,
   verifyLostPetSighting,
+  updateLostPetMusicTheme,
   type LostPet, 
   type LostPetSighting 
 } from '@/services/api';
@@ -21,7 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { format } from 'date-fns';
-import { ArrowLeft, MapPin, Calendar, Phone, Mail, Check, X } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Phone, Mail, Check, X, Music } from 'lucide-react';
+import PetMusicPlayer, { MusicTheme } from '@/components/PetMusicPlayer';
+import MusicThemeSelector from '@/components/MusicThemeSelector';
 
 interface PetDetailsProps {
   pet: LostPet;
@@ -43,6 +46,95 @@ type SightingFormValues = z.infer<typeof sightingSchema>;
 export default function PetDetails({ pet, onBack, onMarkAsFound }: PetDetailsProps) {
   const { toast } = useToast();
   const [showReportForm, setShowReportForm] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<MusicTheme | undefined>(undefined);
+  
+  // Sample music themes (same as in MusicThemeSelector)
+  const musicThemes: MusicTheme[] = [
+    {
+      id: 'playful-purr',
+      name: 'Playful Purr',
+      description: 'Upbeat and cheerful tune for playful cats',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+      category: 'playful',
+      durationSeconds: 30
+    },
+    {
+      id: 'relaxing-meow',
+      name: 'Relaxing Meow',
+      description: 'Calm and soothing melody for relaxed felines',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3',
+      category: 'relaxing',
+      durationSeconds: 30
+    },
+    {
+      id: 'mysterious-purr',
+      name: 'Mysterious Purr',
+      description: 'Enigmatic and curious tones for mysterious cats',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3',
+      category: 'mysterious',
+      durationSeconds: 30
+    },
+    {
+      id: 'quantum-meowsic',
+      name: 'Quantum Meowsic',
+      description: 'Experimental tones for quantum-state cats',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3',
+      category: 'quantum',
+      durationSeconds: 30
+    },
+    {
+      id: 'blockchain-beats',
+      name: 'Blockchain Beats',
+      description: 'Digital rhythms for crypto-savvy cats',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+      category: 'bitcoin',
+      durationSeconds: 30
+    },
+    {
+      id: 'cypherpunk-cat',
+      name: 'Cypherpunk Cat',
+      description: 'Encrypted melodies for privacy-conscious felines',
+      url: 'https://assets.mixkit.co/music/preview/mixkit-hazy-after-hours-132.mp3',
+      category: 'cypherpunk',
+      durationSeconds: 30
+    }
+  ];
+  
+  // Mutation for updating pet's music theme
+  const updateMusicThemeMutation = useMutation({
+    mutationFn: (musicThemeId: string) => 
+      updateLostPetMusicTheme(pet.id, musicThemeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lost-pets', pet.id] });
+      toast({
+        title: "Music theme updated",
+        description: "The pet's music theme has been updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update music theme. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Find the matching music theme if pet has a musicThemeId
+  useEffect(() => {
+    if (pet.musicThemeId) {
+      const theme = musicThemes.find(t => t.id === pet.musicThemeId);
+      if (theme) {
+        setCurrentTheme(theme);
+      }
+    }
+  }, [pet.musicThemeId]);
+  
+  // Handle music theme selection
+  const handleSelectMusicTheme = (theme: MusicTheme) => {
+    setCurrentTheme(theme);
+    updateMusicThemeMutation.mutate(theme.id);
+  };
 
   // Fetch sightings for this pet
   const { data: sightings = [], isLoading } = useQuery({
