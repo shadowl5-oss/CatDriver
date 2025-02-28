@@ -18,6 +18,7 @@ import Whitepaper from './pages/Whitepaper';
 import Partners from './pages/Partners';
 import NietzschesCat from './pages/NietzschesCat';
 import MusicPlayerDemo from './pages/MusicPlayerDemo';
+import LaunchPlan from './pages/LaunchPlan';
 import NotFound from './pages/NotFound';
 import CanvasDemo from './pages/canvas-demo';
 import OrdinalGenerator from './pages/admin/OrdinalGenerator';
@@ -93,6 +94,7 @@ function App() {
             <Route path="/partners" component={Partners} />
             <Route path="/nietzschescat" component={NietzschesCat} />
             <Route path="/music-player-demo" component={MusicPlayerDemo} />
+            <Route path="/launch-plan" component={LaunchPlan} />
             <ProtectedRoute path="/marketplace" component={Marketplace} />
             <ProtectedRoute path="/portfolio" component={Portfolio} />
             <ProtectedRoute path="/governance" component={Governance} />
