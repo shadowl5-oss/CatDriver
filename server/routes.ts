@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertAssetSchema, insertCatNftSchema, insertProposalSchema, insertLostPetSchema, insertLostPetSightingSchema } from "@shared/schema";
 import { z } from "zod";
+import * as fs from "fs";
+import * as path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Users routes
@@ -179,6 +181,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to cast vote" });
     }
   });
+
+  // Whitepaper route
+  app.get("/whitepaper", async (req, res) => {
+    try {
+      const whitepaperPath = path.resolve(__dirname, "../whitepaper.md");
+      const whitepaperContent = fs.readFileSync(whitepaperPath, "utf-8");
+      
+      // Convert markdown to HTML for better display
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Driven by CatDAO: Whitepaper</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h2 {
+            margin-top: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 15px;
+            color: #555;
+            margin-left: 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* Convert markdown to simple HTML */
+        .markdown {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="markdown">${whitepaperContent}</div>
+</body>
+</html>
+      `;
+      
+      res.send(htmlContent);
+    } catch (error) {
+      console.error("Error serving whitepaper:", error);
+      res.status(500).send("Error loading whitepaper");
+    }
+  });
+
   
   // Portfolio routes
   app.get("/api/portfolio/:userId", async (req, res) => {
